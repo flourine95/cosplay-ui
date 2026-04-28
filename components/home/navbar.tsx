@@ -9,10 +9,10 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 
 const navLinks = [
-  { label: "Mua ngay", href: "#shop" },
-  { label: "Thuê trang phục", href: "#rent" },
+  { label: "Mua ngay", href: "/products" },
+  { label: "Thuê trang phục", href: "/products?service=rent" },
   { label: "Đặt may", href: "#custom" },
-  { label: "Bộ sưu tập", href: "#collections" },
+  { label: "Bộ sưu tập", href: "/products" },
   { label: "Blog", href: "#blog" },
 ]
 
