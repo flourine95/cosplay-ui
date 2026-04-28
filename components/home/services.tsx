@@ -1,101 +1,100 @@
-import { ShoppingBag, CalendarDays, Scissors } from "lucide-react"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { ShoppingBag, CalendarDays, Scissors, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-
-const services = [
-  {
-    icon: ShoppingBag,
-    title: "Mua trực tiếp",
-    description:
-      "Sở hữu ngay trang phục cosplay chất lượng cao. Đa dạng size, giao hàng nhanh toàn quốc trong 2–5 ngày.",
-    cta: "Mua ngay",
-    href: "#shop",
-    color: "from-violet-500 to-violet-600",
-    bg: "bg-violet-50",
-    iconColor: "text-violet-600",
-  },
-  {
-    icon: CalendarDays,
-    title: "Thuê trang phục",
-    description:
-      "Thuê theo ngày hoặc tuần với giá cực hợp lý. Phù hợp cho sự kiện, hội thi, chụp ảnh. Đặt cọc đơn giản.",
-    cta: "Xem để thuê",
-    href: "#rent",
-    color: "from-pink-500 to-rose-500",
-    bg: "bg-pink-50",
-    iconColor: "text-pink-600",
-  },
-  {
-    icon: Scissors,
-    title: "Đặt may theo yêu cầu",
-    description:
-      "Không tìm thấy trang phục ưng ý? Đặt may theo số đo và thiết kế riêng. Thợ may chuyên nghiệp, giao trong 7–14 ngày.",
-    cta: "Đặt may ngay",
-    href: "#custom",
-    color: "from-fuchsia-500 to-pink-500",
-    bg: "bg-fuchsia-50",
-    iconColor: "text-fuchsia-600",
-  },
-]
 
 export function Services() {
   return (
     <section id="services" className="bg-background py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-12 text-center">
-          <p className="mb-2 text-sm font-semibold tracking-widest text-violet-600 uppercase">
-            Dịch vụ của chúng tôi
+        <div className="mb-12">
+          <p className="mb-2 text-sm font-semibold tracking-widest text-primary uppercase">
+            Dịch vụ
           </p>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
             Mọi nhu cầu cosplay, một nơi duy nhất
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Dù bạn muốn mua, thuê hay đặt may — cosplay.vn đều có thể đáp ứng
-            với chất lượng tốt nhất.
-          </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {services.map((service) => {
-            const Icon = service.icon
-            return (
-              <Card
-                key={service.title}
-                className="group relative overflow-hidden border-border/60 transition-shadow hover:shadow-lg"
-              >
-                <div
-                  className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${service.color}`}
-                />
-                <CardHeader className="pb-3">
-                  <div
-                    className={`mb-3 flex size-12 items-center justify-center rounded-xl ${service.bg}`}
-                  >
-                    <Icon className={`size-6 ${service.iconColor}`} />
-                  </div>
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {service.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    variant="outline"
-                    className="w-full group-hover:border-violet-300 group-hover:text-violet-600"
-                    asChild
-                  >
-                    <Link href={service.href}>{service.cta}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            )
-          })}
+        {/* Asymmetric layout — not identical cards */}
+        <div className="grid gap-px overflow-hidden rounded-2xl bg-border md:grid-cols-3">
+          {/* Mua trực tiếp — primary service, larger visual weight */}
+          <div className="flex flex-col gap-4 bg-primary p-8 md:col-span-1">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-primary-foreground/15">
+              <ShoppingBag className="size-6 text-primary-foreground" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xl font-bold text-primary-foreground">
+                Mua trực tiếp
+              </h3>
+              <p className="text-sm leading-relaxed text-primary-foreground/75">
+                Sở hữu ngay trang phục chất lượng cao. Đa dạng size, giao hàng
+                2–5 ngày toàn quốc.
+              </p>
+            </div>
+            <Button variant="secondary" className="mt-auto w-fit" asChild>
+              <Link href="#shop">
+                Mua ngay
+                <ArrowRight data-icon="inline-end" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* Thuê trang phục */}
+          <div className="flex flex-col gap-4 bg-card p-8">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-brand-subtle">
+              <CalendarDays className="size-6 text-brand-subtle-foreground" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xl font-bold text-foreground">
+                Thuê trang phục
+              </h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Thuê theo ngày hoặc tuần với giá hợp lý. Phù hợp cho sự kiện,
+                hội thi, chụp ảnh. Đặt cọc đơn giản.
+              </p>
+            </div>
+            <Separator />
+            <ul className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+              <li>Từ 99K/ngày</li>
+              <li>Đặt cọc 30%</li>
+              <li>Giao nhận tận nơi HCM & HN</li>
+            </ul>
+            <Button variant="outline" className="mt-auto w-fit" asChild>
+              <Link href="#rent">
+                Xem để thuê
+                <ArrowRight data-icon="inline-end" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* Đặt may */}
+          <div className="flex flex-col gap-4 bg-card p-8">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-secondary">
+              <Scissors className="size-6 text-secondary-foreground" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xl font-bold text-foreground">
+                Đặt may theo yêu cầu
+              </h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Không tìm thấy trang phục ưng ý? Đặt may theo số đo và thiết kế
+                riêng. Thợ may chuyên nghiệp, giao trong 7–14 ngày.
+              </p>
+            </div>
+            <Separator />
+            <ul className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+              <li>Theo số đo cá nhân</li>
+              <li>Cập nhật tiến độ qua Zalo</li>
+              <li>Thanh toán khi nhận hàng</li>
+            </ul>
+            <Button variant="outline" className="mt-auto w-fit" asChild>
+              <Link href="#custom">
+                Đặt may ngay
+                <ArrowRight data-icon="inline-end" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ShoppingCart, Search, Menu, Sparkles } from "lucide-react"
+import { ShoppingCart, Search, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
@@ -24,14 +24,8 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-pink-500">
-            <Sparkles className="size-4 text-white" />
-          </div>
-          <span className="text-lg font-bold tracking-tight">
-            <span className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
-              cosplay
-            </span>
-            <span className="text-foreground">.vn</span>
+          <span className="text-lg font-bold tracking-tight text-foreground">
+            cosplay<span className="text-primary">.vn</span>
           </span>
         </Link>
 
@@ -50,25 +44,33 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="hidden md:flex">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:flex"
+            aria-label="Tìm kiếm"
+          >
             <Search />
           </Button>
-          <Button variant="ghost" size="icon" className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            aria-label="Giỏ hàng"
+          >
             <ShoppingCart />
-            <Badge className="absolute -top-1 -right-1 size-4 justify-center border-0 bg-gradient-to-r from-violet-600 to-pink-500 p-0 text-[10px]">
+            <Badge className="absolute -top-1 -right-1 size-4 justify-center border-0 bg-primary p-0 text-[10px]">
               3
             </Badge>
           </Button>
-          <Button
-            className="hidden bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90 md:flex"
-            size="sm"
-          >
+          <Button className="hidden md:flex" size="sm">
             Đăng nhập
           </Button>
           <Button
             variant="ghost"
             size="icon"
             className="md:hidden"
+            aria-label="Mở menu"
             onClick={() => setMobileOpen(true)}
           >
             <Menu />
@@ -81,14 +83,8 @@ export function Navbar() {
         <SheetContent side="left" className="w-72">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <div className="flex items-center gap-2 pb-4">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-pink-500">
-              <Sparkles className="size-4 text-white" />
-            </div>
-            <span className="text-lg font-bold">
-              <span className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
-                cosplay
-              </span>
-              .vn
+            <span className="text-lg font-bold text-foreground">
+              cosplay<span className="text-primary">.vn</span>
             </span>
           </div>
           <Separator />
@@ -105,9 +101,7 @@ export function Navbar() {
             ))}
           </nav>
           <div className="mt-4">
-            <Button className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90">
-              Đăng nhập
-            </Button>
+            <Button className="w-full">Đăng nhập</Button>
           </div>
         </SheetContent>
       </Sheet>

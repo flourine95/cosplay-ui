@@ -34,7 +34,7 @@ export function CustomOrder() {
     <section id="custom" className="bg-background py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mb-12 text-center">
-          <p className="mb-2 text-sm font-semibold tracking-widest text-violet-600 uppercase">
+          <p className="mb-2 text-sm font-semibold tracking-widest text-primary uppercase">
             Đặt may theo yêu cầu
           </p>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
@@ -46,25 +46,26 @@ export function CustomOrder() {
           </p>
         </div>
 
-        <div className="relative grid gap-8 md:grid-cols-4">
-          {/* Connector line */}
-          <div className="absolute top-8 right-0 left-0 hidden h-px bg-gradient-to-r from-violet-200 via-pink-300 to-violet-200 md:block" />
-
-          {steps.map((step) => {
+        {/* Steps as a horizontal flow with numbered connectors */}
+        <div className="grid gap-6 md:grid-cols-4">
+          {steps.map((step, index) => {
             const Icon = step.icon
             return (
-              <div
-                key={step.step}
-                className="relative flex flex-col items-center gap-4 text-center"
-              >
-                <div className="relative flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-pink-500 shadow-lg shadow-violet-200">
-                  <Icon className="size-7 text-white" />
-                  <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-violet-600 shadow">
-                    {step.step}
-                  </span>
+              <div key={step.step} className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Icon className="size-5" />
+                  </div>
+                  {/* Connector — only between steps, not after last */}
+                  {index < steps.length - 1 && (
+                    <div className="hidden h-px flex-1 bg-border md:block" />
+                  )}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">
+                  <span className="text-xs font-bold text-primary">
+                    {step.step}
+                  </span>
+                  <h3 className="mt-0.5 font-semibold text-foreground">
                     {step.title}
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -77,11 +78,7 @@ export function CustomOrder() {
         </div>
 
         <div className="mt-12 flex justify-center">
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90"
-            asChild
-          >
+          <Button size="lg" asChild>
             <Link href="#custom-form">Đặt may ngay</Link>
           </Button>
         </div>

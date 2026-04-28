@@ -2,7 +2,6 @@ import Image from "next/image"
 import { Heart, ShoppingCart, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
 
 const products = [
   {
@@ -15,8 +14,6 @@ const products = [
     reviews: 128,
     image:
       "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=500&fit=crop",
-    gradient: null,
-    emoji: null,
     badge: "Bán chạy",
     badgeVariant: "default" as const,
     canRent: true,
@@ -31,7 +28,7 @@ const products = [
     rating: 4.8,
     reviews: 95,
     image: null,
-    gradient: "from-blue-400 via-cyan-500 to-teal-500",
+    bgClass: "bg-secondary",
     emoji: "🌸",
     badge: "Mới",
     badgeVariant: "secondary" as const,
@@ -48,8 +45,6 @@ const products = [
     reviews: 67,
     image:
       "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=400&h=500&fit=crop",
-    gradient: null,
-    emoji: null,
     badge: "Hot",
     badgeVariant: "destructive" as const,
     canRent: false,
@@ -64,7 +59,7 @@ const products = [
     rating: 4.7,
     reviews: 203,
     image: null,
-    gradient: "from-yellow-300 via-pink-400 to-rose-500",
+    bgClass: "bg-brand-subtle",
     emoji: "🌙",
     badge: "Thuê được",
     badgeVariant: "outline" as const,
@@ -86,7 +81,7 @@ export function FeaturedProducts() {
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mb-10 flex items-end justify-between">
           <div>
-            <p className="mb-1 text-sm font-semibold tracking-widest text-violet-600 uppercase">
+            <p className="mb-1 text-sm font-semibold tracking-widest text-primary uppercase">
               Nổi bật
             </p>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
@@ -100,9 +95,9 @@ export function FeaturedProducts() {
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((product) => (
-            <Card
+            <div
               key={product.id}
-              className="group overflow-hidden border-border/60 p-0 transition-shadow hover:shadow-lg"
+              className="group overflow-hidden rounded-2xl border border-border/60 bg-card transition-shadow hover:shadow-lg"
             >
               <div className="relative overflow-hidden">
                 <div className="relative aspect-[4/5] w-full">
@@ -116,27 +111,18 @@ export function FeaturedProducts() {
                     />
                   ) : (
                     <div
-                      className={`absolute inset-0 bg-gradient-to-br ${product.gradient} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}
+                      className={`absolute inset-0 ${product.bgClass} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}
                     >
                       <span className="text-7xl">{product.emoji}</span>
                     </div>
                   )}
                 </div>
                 <div className="absolute top-3 left-3 flex flex-col gap-1">
-                  <Badge
-                    variant={product.badgeVariant}
-                    className={
-                      product.badgeVariant === "default"
-                        ? "border-0 bg-gradient-to-r from-violet-600 to-pink-500"
-                        : ""
-                    }
-                  >
-                    {product.badge}
-                  </Badge>
+                  <Badge variant={product.badgeVariant}>{product.badge}</Badge>
                   {product.canRent && (
                     <Badge
                       variant="secondary"
-                      className="bg-white/90 text-violet-700"
+                      className="bg-card/90 text-primary"
                     >
                       Có thể thuê
                     </Badge>
@@ -145,20 +131,24 @@ export function FeaturedProducts() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-3 right-3 size-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+                  aria-label="Thêm vào yêu thích"
+                  className="absolute top-3 right-3 size-8 rounded-full bg-card/80 backdrop-blur-sm hover:bg-card"
                 >
                   <Heart className="size-4 text-muted-foreground" />
                 </Button>
               </div>
 
-              <CardContent className="p-4 pb-2">
+              <div className="p-4 pb-2">
                 <p className="text-xs text-muted-foreground">
                   {product.series}
                 </p>
                 <h3 className="mt-0.5 font-semibold text-foreground">
                   {product.name}
                 </h3>
-                <div className="mt-1 flex items-center gap-1">
+                <div
+                  className="mt-1 flex items-center gap-1"
+                  aria-label={`${product.rating} sao, ${product.reviews} đánh giá`}
+                >
                   <Star className="size-3 fill-amber-400 text-amber-400" />
                   <span className="text-xs font-medium">{product.rating}</span>
                   <span className="text-xs text-muted-foreground">
@@ -176,22 +166,19 @@ export function FeaturedProducts() {
                   )}
                 </div>
                 {product.canRent && product.rentPrice && (
-                  <p className="mt-0.5 text-xs text-violet-600">
+                  <p className="mt-0.5 text-xs text-primary">
                     Thuê từ {formatPrice(product.rentPrice)}/ngày
                   </p>
                 )}
-              </CardContent>
+              </div>
 
-              <CardFooter className="flex gap-2 p-4 pt-2">
-                <Button
-                  size="sm"
-                  className="flex-1 bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90"
-                >
+              <div className="flex gap-2 p-4 pt-2">
+                <Button size="sm" className="flex-1">
                   <ShoppingCart data-icon="inline-start" />
                   Thêm vào giỏ
                 </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
 

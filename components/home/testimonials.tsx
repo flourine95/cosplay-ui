@@ -1,6 +1,6 @@
 import { Star } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 
 const reviews = [
   {
@@ -46,7 +46,7 @@ export function Testimonials() {
     <section className="bg-muted/30 py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mb-10 text-center">
-          <p className="mb-1 text-sm font-semibold tracking-widest text-violet-600 uppercase">
+          <p className="mb-1 text-sm font-semibold tracking-widest text-primary uppercase">
             Đánh giá
           </p>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
@@ -54,22 +54,26 @@ export function Testimonials() {
           </h2>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {reviews.map((review) => (
-            <Card key={review.name} className="border-border/60">
-              <CardContent className="flex flex-col gap-4 p-5">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: review.rating }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className="size-4 fill-amber-400 text-amber-400"
-                    />
-                  ))}
-                </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  &ldquo;{review.comment}&rdquo;
-                </p>
-                <div className="flex items-center gap-3 pt-1">
+        {/* Varied layout: first two reviews larger, last two smaller */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {reviews.slice(0, 2).map((review) => (
+            <div
+              key={review.name}
+              className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-6"
+            >
+              <div className="flex gap-0.5" aria-label={`${review.rating} sao`}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`size-4 ${i < review.rating ? "fill-amber-400 text-amber-400" : "text-border"}`}
+                  />
+                ))}
+              </div>
+              <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+                &ldquo;{review.comment}&rdquo;
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <Avatar className="size-9">
                     <AvatarImage src={review.avatar} alt={review.name} />
                     <AvatarFallback>{review.initials}</AvatarFallback>
@@ -78,12 +82,53 @@ export function Testimonials() {
                     <p className="text-sm font-semibold text-foreground">
                       {review.name}
                     </p>
-                    <p className="text-xs text-violet-600">{review.service}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <Badge variant="secondary" className="text-xs">
+                  {review.service}
+                </Badge>
+              </div>
+            </div>
           ))}
+
+          {/* Third column: two stacked smaller reviews */}
+          <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
+            {reviews.slice(2).map((review) => (
+              <div
+                key={review.name}
+                className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="size-8">
+                      <AvatarImage src={review.avatar} alt={review.name} />
+                      <AvatarFallback>{review.initials}</AvatarFallback>
+                    </Avatar>
+                    <p className="text-sm font-semibold text-foreground">
+                      {review.name}
+                    </p>
+                  </div>
+                  <div
+                    className="flex shrink-0 gap-0.5"
+                    aria-label={`${review.rating} sao`}
+                  >
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`size-3 ${i < review.rating ? "fill-amber-400 text-amber-400" : "text-border"}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  &ldquo;{review.comment}&rdquo;
+                </p>
+                <Badge variant="secondary" className="w-fit text-xs">
+                  {review.service}
+                </Badge>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
