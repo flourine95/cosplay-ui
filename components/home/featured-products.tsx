@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Heart, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -6,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 const products = [
   {
     id: 1,
+    slug: "nezuko-kamado",
     name: "Nezuko Kamado",
     series: "Demon Slayer",
     price: 850000,
@@ -19,6 +21,7 @@ const products = [
   },
   {
     id: 2,
+    slug: "rem-rezero",
     name: "Rem",
     series: "Re:Zero",
     price: 920000,
@@ -32,6 +35,7 @@ const products = [
   },
   {
     id: 3,
+    slug: "batman",
     name: "Batman",
     series: "DC Comics",
     price: 1100000,
@@ -45,6 +49,7 @@ const products = [
   },
   {
     id: 4,
+    slug: "sailor-moon",
     name: "Sailor Moon",
     series: "Sailor Moon",
     price: 750000,
@@ -80,7 +85,11 @@ export function FeaturedProducts() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((product) => (
-            <div key={product.id} className="group flex flex-col gap-3">
+            <Link
+              key={product.id}
+              href={`/products/${product.slug}`}
+              className="group flex flex-col gap-3"
+            >
               {/* Image with hover overlay */}
               <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
                 <Image
@@ -154,7 +163,7 @@ export function FeaturedProducts() {
                   </p>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
