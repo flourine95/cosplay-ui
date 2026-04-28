@@ -385,9 +385,11 @@ export function DatMayForm() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-2 border-t pt-4">
-                <Button size="lg" className="w-full font-semibold">
-                  <Scissors className="mr-2 h-4 w-4" />
-                  Gửi yêu cầu Báo giá
+                <Button asChild size="lg" className="w-full font-semibold">
+                  <Link href="/dat-may/1">
+                    <Scissors className="mr-2 h-4 w-4" />
+                    Gửi yêu cầu Báo giá
+                  </Link>
                 </Button>
                 <Button
                   variant="ghost"

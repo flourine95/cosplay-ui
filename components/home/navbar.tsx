@@ -11,10 +11,10 @@ import { useCart } from "@/lib/cart-context"
 
 const navLinks = [
   { label: "Mua ngay", href: "/products" },
-  { label: "Thuê trang phục", href: "/products?service=rent" },
-  { label: "Đặt may", href: "#custom" },
-  { label: "Bộ sưu tập", href: "/products" },
-  { label: "Blog", href: "#blog" },
+  { label: "Thuê trang phục", href: "/thue-do/1" },
+  { label: "Đặt may", href: "/dat-may" },
+  { label: "Tiến độ đặt may", href: "/dat-may/1" },
+  { label: "Quản lý đơn thuê", href: "/thue-do/quan-ly" },
 ]
 
 export function Navbar() {

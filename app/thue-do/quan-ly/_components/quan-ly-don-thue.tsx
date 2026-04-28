@@ -279,12 +279,15 @@ function RentalCard({ rental }: { rental: (typeof rentals)[0] }) {
                 </Button>
               )}
               <Button
+                asChild
                 size="sm"
                 variant="ghost"
                 className="gap-1.5 text-muted-foreground"
               >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Chi tiết
+                <Link href="/thue-do/1">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Chi tiết
+                </Link>
               </Button>
             </div>
           </div>

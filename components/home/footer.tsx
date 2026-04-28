@@ -4,10 +4,10 @@ import { Separator } from "@/components/ui/separator"
 
 const footerLinks = {
   "Dịch vụ": [
-    { label: "Mua trang phục", href: "#shop" },
-    { label: "Thuê trang phục", href: "#rent" },
-    { label: "Đặt may theo yêu cầu", href: "#custom" },
-    { label: "Phụ kiện cosplay", href: "#accessories" },
+    { label: "Mua trang phục", href: "/products" },
+    { label: "Thuê trang phục", href: "/thue-do/1" },
+    { label: "Đặt may theo yêu cầu", href: "/dat-may" },
+    { label: "Phụ kiện cosplay", href: "/products" },
   ],
   "Hỗ trợ": [
     { label: "Hướng dẫn chọn size", href: "#size-guide" },
