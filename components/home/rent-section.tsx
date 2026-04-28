@@ -2,7 +2,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { CheckCircle2, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 
 const benefits = [
   "Đặt cọc chỉ 30% giá trị trang phục",
@@ -14,13 +13,13 @@ const benefits = [
 
 export function RentSection() {
   return (
-    <section id="rent" className="bg-muted/30 py-16 md:py-24">
+    <section id="rent" className="bg-muted/30 py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Images */}
           <div className="relative">
             <div className="grid grid-cols-2 gap-3">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
                 <Image
                   src="https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=533&fit=crop"
                   alt="Thuê trang phục cosplay"
@@ -31,18 +30,23 @@ export function RentSection() {
                 />
               </div>
               <div className="flex flex-col gap-3 pt-8">
-                <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-brand-subtle">
-                  <div className="text-center">
-                    <div className="mb-1 text-4xl">👗</div>
-                    <p className="text-sm font-bold text-brand-subtle-foreground">
-                      500+ bộ
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      sẵn sàng thuê
+                <div className="relative aspect-square overflow-hidden rounded-xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&h=400&fit=crop"
+                    alt="500+ bộ sẵn thuê"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
+                  <div className="absolute bottom-3 left-3">
+                    <p className="text-2xl font-extrabold text-white">500+</p>
+                    <p className="text-xs font-medium text-white/80">
+                      bộ sẵn thuê
                     </p>
                   </div>
                 </div>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
                   <Image
                     src="https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=400&h=533&fit=crop"
                     alt="Thuê trang phục cosplay"
@@ -54,8 +58,7 @@ export function RentSection() {
               </div>
             </div>
 
-            {/* Price tag */}
-            <div className="absolute top-8 -right-4 rounded-xl border border-border bg-card p-3 shadow-lg">
+            <div className="absolute top-8 -right-4 rounded-lg border border-border bg-card px-4 py-3 shadow-lg">
               <p className="text-xs text-muted-foreground">Giá thuê từ</p>
               <p className="text-xl font-bold text-primary">99K/ngày</p>
             </div>
@@ -63,16 +66,12 @@ export function RentSection() {
 
           {/* Content */}
           <div className="flex flex-col gap-6">
-            <Badge variant="secondary" className="w-fit">
-              Dịch vụ cho thuê
-            </Badge>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-              Thuê trang phục — tiết kiệm, tiện lợi
+              Thuê thay vì mua, tiết kiệm thật sự
             </h2>
             <p className="text-muted-foreground">
               Không cần bỏ ra cả triệu để mua một bộ chỉ mặc vài lần. Thuê trang
-              phục cosplay chất lượng cao với giá hợp lý, phù hợp cho mọi sự
-              kiện.
+              phục chất lượng cao với giá hợp lý, phù hợp cho mọi sự kiện.
             </p>
 
             <ul className="flex flex-col gap-3">
@@ -84,7 +83,7 @@ export function RentSection() {
               ))}
             </ul>
 
-            <Button size="lg" className="w-fit" asChild>
+            <Button size="lg" className="w-fit rounded-full" asChild>
               <Link href="#rent-catalog">
                 Xem trang phục cho thuê
                 <ArrowRight data-icon="inline-end" />

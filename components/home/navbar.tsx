@@ -63,7 +63,11 @@ export function Navbar() {
               3
             </Badge>
           </Button>
-          <Button className="hidden md:flex" size="sm">
+          <Button
+            variant="outline"
+            className="hidden rounded-full md:flex"
+            size="sm"
+          >
             Đăng nhập
           </Button>
           <Button
@@ -101,7 +105,9 @@ export function Navbar() {
             ))}
           </nav>
           <div className="mt-4">
-            <Button className="w-full">Đăng nhập</Button>
+            <Button variant="outline" className="w-full rounded-full">
+              Đăng nhập
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
