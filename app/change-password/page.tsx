@@ -15,7 +15,6 @@ export default function ChangePasswordPage() {
       imageAlt="Người mẫu đứng trong không gian studio tối"
       imageLabel="Bảo mật tài khoản"
       imageTitle="Một mật khẩu mới, an toàn hơn cho tài khoản cosplay của bạn."
-      imageDescription="Dùng mật khẩu mạnh, khác với các tài khoản khác để giữ lịch sử đơn hàng, địa chỉ và phương thức thanh toán luôn an toàn."
       stats={[
         { value: "12 ký tự", label: "khuyến nghị" },
         { value: "2 lớp", label: "bảo vệ" },

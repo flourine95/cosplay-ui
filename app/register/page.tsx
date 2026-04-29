@@ -15,8 +15,7 @@ export default function RegisterPage() {
       imageSrc="https://upload.wikimedia.org/wikipedia/commons/1/10/Cerisier_du_Japon_Prunus_serrulata.jpg"
       imageAlt="Mẫu cosplay với ánh sáng điện ảnh"
       imageLabel="Tạo tài khoản mới"
-      imageTitle="Bắt đầu hành trình mua sắm với một tài khoản duy nhất cho mọi đơn hàng."
-      imageDescription="Tài khoản giúp đồng bộ giỏ hàng, theo dõi trạng thái đơn, đặt may riêng và quản lý yêu thích trên mọi thiết bị."
+      imageTitle="Tạo tài khoản trong vài bước."
       stats={[
         { value: "7 ngày", label: "đổi trả" },
         { value: "100%", label: "đồng bộ" },

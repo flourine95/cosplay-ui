@@ -14,9 +14,8 @@ export default function LoginPage() {
       description="Truy cập tài khoản để theo dõi đơn hàng, lưu trang phục yêu thích và nhận ưu đãi dành riêng cho bạn."
       imageSrc="https://upload.wikimedia.org/wikipedia/commons/1/10/Cerisier_du_Japon_Prunus_serrulata.jpg"
       imageAlt="Mẫu cosplay trong không gian chụp ảnh tối"
-      imageLabel="Tài khoản thành viên"
-      imageTitle="Đăng nhập nhanh, quay lại giỏ hàng và lịch sử đơn chỉ trong một chạm."
-      imageDescription="Tất cả dữ liệu đặt hàng, wishlist và phản hồi hỗ trợ đều nằm trong cùng một tài khoản để bạn theo dõi xuyên suốt hành trình mua sắm cosplay."
+      imageLabel="Tài khoản"
+      imageTitle="Đăng nhập để tiếp tục mua sắm."
       stats={[
         { value: "500+", label: "bộ cosplay" },
         { value: "24h", label: "hỗ trợ" },

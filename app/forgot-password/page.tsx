@@ -14,8 +14,7 @@ export default function ForgotPasswordPage() {
       imageSrc="https://upload.wikimedia.org/wikipedia/commons/1/10/Cerisier_du_Japon_Prunus_serrulata.jpg"
       imageAlt="Không gian hậu trường chụp ảnh thời trang"
       imageLabel="Khôi phục tài khoản"
-      imageTitle="Lấy lại quyền truy cập tài khoản một cách nhanh chóng và an toàn."
-      imageDescription="Sau khi xác thực email, bạn sẽ nhận được liên kết để đổi mật khẩu mới và tiếp tục mua sắm ngay lập tức."
+      imageTitle="Lấy lại quyền truy cập."
       stats={[
         { value: "3 phút", label: "gửi mail" },
         { value: "Bảo mật", label: "xác minh" },

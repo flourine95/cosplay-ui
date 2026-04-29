@@ -12,7 +12,6 @@ type AuthShellProps = {
   imageAlt: string
   imageLabel: string
   imageTitle: string
-  imageDescription: string
   stats: Array<{ label: string; value: string }>
   children: React.ReactNode
   className?: string
@@ -25,42 +24,41 @@ export function AuthShell({
   imageAlt,
   imageLabel,
   imageTitle,
-  imageDescription,
   stats,
   children,
   className,
 }: AuthShellProps) {
   return (
-    <section className="dark min-h-screen bg-[radial-gradient(circle_at_top,_rgba(110,84,255,0.18)_0%,_rgba(10,10,20,0.98)_42%,_rgba(6,8,14,1)_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+    <section className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(255,214,102,0.28)_0%,_rgba(255,255,255,0.94)_34%,_rgba(245,247,255,1)_62%,_rgba(255,250,242,1)_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
       <div
         className={cn(
-          "mx-auto grid min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-[0_32px_120px_rgba(3,4,15,0.45)] backdrop-blur-xl lg:grid-cols-[1.02fr_0.98fr]",
+          "mx-auto grid min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-border/70 bg-background/80 shadow-[0_32px_120px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:grid-cols-[1.02fr_0.98fr]",
           className
         )}
       >
-        <div className="relative hidden min-h-[560px] overflow-hidden bg-[#161129] p-5 text-white lg:flex lg:flex-col lg:justify-between">
+        <div className="relative hidden min-h-[560px] overflow-hidden bg-[linear-gradient(180deg,rgba(24,20,46,0.18)_0%,rgba(51,38,86,0.08)_35%,rgba(255,246,232,0.94)_100%)] p-5 text-foreground lg:flex lg:flex-col lg:justify-between">
           <Image
             src={imageSrc}
             alt={imageAlt}
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 56vw"
-            className="object-cover opacity-95"
+            className="object-cover opacity-90"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,14,31,0.12)_0%,rgba(17,14,31,0.26)_44%,rgba(10,10,20,0.82)_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(147,197,253,0.15),_transparent_32%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,250,242,0.14)_0%,rgba(255,247,235,0.16)_38%,rgba(15,23,42,0.64)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,214,102,0.30),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(96,165,250,0.18),_transparent_30%)]" />
 
           <div className="relative z-10 flex items-center justify-between gap-3">
             <Link
               href="/"
-              className="text-2xl font-semibold tracking-[0.18em] text-white/95 uppercase"
+              className="text-2xl font-semibold tracking-[0.18em] text-foreground uppercase"
             >
               cosplay.vn
             </Link>
             <Button
               asChild
               variant="outline"
-              className="rounded-full border-white/15 bg-white/10 text-white hover:bg-white/16"
+              className="rounded-full border-border/70 bg-background/85 text-foreground hover:bg-background"
             >
               <Link href="/">
                 Quay về cửa hàng
@@ -70,49 +68,34 @@ export function AuthShell({
           </div>
 
           <div className="relative z-10 flex max-w-xl flex-col gap-6">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur-md">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-background/80 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md">
               <Sparkles className="size-4 text-brand" />
               {imageLabel}
             </div>
             <div className="space-y-4">
-              <h2 className="max-w-lg text-4xl leading-tight font-semibold tracking-tight text-white md:text-5xl">
+              <h2 className="max-w-lg text-4xl leading-tight font-semibold tracking-tight text-foreground md:text-5xl">
                 {imageTitle}
               </h2>
-              <p className="max-w-xl text-base leading-7 text-white/70 md:text-lg">
-                {imageDescription}
-              </p>
             </div>
             <div className="flex flex-wrap gap-3 pt-2">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-white/12 bg-white/8 px-4 py-3 backdrop-blur-md"
+                  className="rounded-2xl border border-border/70 bg-background/82 px-4 py-3 shadow-sm backdrop-blur-md"
                 >
-                  <div className="text-2xl font-semibold text-white">
+                  <div className="text-2xl font-semibold text-foreground">
                     {stat.value}
                   </div>
-                  <div className="text-xs tracking-[0.2em] text-white/55 uppercase">
+                  <div className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                     {stat.label}
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="relative z-10 flex items-end justify-between gap-4">
-            <div className="max-w-sm text-sm text-white/68">
-              Tài khoản của bạn luôn đồng bộ với đơn hàng, yêu thích và lịch sử
-              mua sắm trên toàn bộ website.
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-10 rounded-full bg-white/25" />
-              <span className="h-1.5 w-10 rounded-full bg-white/25" />
-              <span className="h-1.5 w-10 rounded-full bg-white" />
-            </div>
-          </div>
         </div>
 
-        <div className="flex items-center bg-background/92 px-5 py-8 sm:px-8 md:px-10 lg:px-12">
+        <div className="flex items-center bg-background/90 px-5 py-8 sm:px-8 md:px-10 lg:px-12">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-8 flex items-center justify-between gap-3 lg:hidden">
               <Link
@@ -125,7 +108,7 @@ export function AuthShell({
                 asChild
                 variant="outline"
                 size="sm"
-                className="rounded-full"
+                className="rounded-full border-border/70 bg-background/80"
               >
                 <Link href="/">Quay về cửa hàng</Link>
               </Button>
@@ -143,7 +126,7 @@ export function AuthShell({
               </p>
             </div>
 
-            <div className="mt-8 rounded-[1.75rem] border border-border/70 bg-card/90 p-5 shadow-[0_20px_80px_rgba(15,23,42,0.08)] sm:p-6">
+            <div className="mt-8 rounded-[1.75rem] border border-border/70 bg-card/96 p-5 shadow-[0_20px_80px_rgba(15,23,42,0.08)] sm:p-6">
               {children}
             </div>
           </div>
