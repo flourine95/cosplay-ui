@@ -114,7 +114,7 @@ const messages = [
   },
 ]
 
-export function TheoDoiTienDo() {
+export function ProgressTracking() {
   const [revisionText, setRevisionText] = useState("")
   const [message, setMessage] = useState("")
   const progressPercent = 60
@@ -131,7 +131,7 @@ export function TheoDoiTienDo() {
             </Link>
             <ChevronRight className="h-3 w-3" />
             <Link
-              href="/dat-may"
+              href="/custom-order"
               className="transition-colors hover:text-foreground"
             >
               Đặt may

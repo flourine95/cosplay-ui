@@ -1,5 +1,8 @@
 * text=auto eol=lf
 
+# Prevent merge conflicts on npm lockfile
+package-lock.json merge=npm-merge-driver
+
 *.ts   text eol=lf
 *.tsx  text eol=lf
 *.js   text eol=lf

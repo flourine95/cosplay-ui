@@ -62,7 +62,7 @@ const measurements = [
   { label: "Dài quần", unit: "cm", placeholder: "100" },
 ]
 
-export function DatMayForm() {
+export function CustomOrderForm() {
   const [date, setDate] = useState<Date>()
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
 
@@ -386,7 +386,7 @@ export function DatMayForm() {
               </CardContent>
               <CardFooter className="flex flex-col gap-2 border-t pt-4">
                 <Button asChild size="lg" className="w-full font-semibold">
-                  <Link href="/dat-may/1">
+                  <Link href="/custom-order/1">
                     <Scissors className="mr-2 h-4 w-4" />
                     Gửi yêu cầu Báo giá
                   </Link>

@@ -5,8 +5,8 @@ import { Separator } from "@/components/ui/separator"
 const footerLinks = {
   "Dịch vụ": [
     { label: "Mua trang phục", href: "/products" },
-    { label: "Thuê trang phục", href: "/thue-do/1" },
-    { label: "Đặt may theo yêu cầu", href: "/dat-may" },
+    { label: "Thuê trang phục", href: "/rental/1" },
+    { label: "Đặt may theo yêu cầu", href: "/custom-order" },
     { label: "Phụ kiện cosplay", href: "/products" },
   ],
   "Hỗ trợ": [

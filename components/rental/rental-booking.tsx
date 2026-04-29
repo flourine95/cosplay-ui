@@ -50,7 +50,7 @@ const policies = [
   { Icon: ShieldCheck, text: "Cọc hoàn trả 100% khi đồ nguyên vẹn, trong 24h" },
 ]
 
-export function DatLichThue() {
+export function RentalBooking() {
   const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
@@ -78,7 +78,7 @@ export function DatLichThue() {
             </Link>
             <ChevronRight className="h-3 w-3" />
             <Link
-              href="/thue-do"
+              href="/rental"
               className="transition-colors hover:text-foreground"
             >
               Thuê đồ

@@ -284,7 +284,7 @@ function RentalCard({ rental }: { rental: (typeof rentals)[0] }) {
                 variant="ghost"
                 className="gap-1.5 text-muted-foreground"
               >
-                <Link href="/thue-do/1">
+                <Link href="/rental/1">
                   <ExternalLink className="h-3.5 w-3.5" />
                   Chi tiết
                 </Link>
@@ -297,7 +297,7 @@ function RentalCard({ rental }: { rental: (typeof rentals)[0] }) {
   )
 }
 
-export function QuanLyDonThue() {
+export function RentalManagement() {
   const [search, setSearch] = useState("")
   const filtered = rentals.filter(
     (r) =>
@@ -429,7 +429,7 @@ export function QuanLyDonThue() {
             </p>
           </div>
           <Button asChild className="shrink-0 rounded-full px-6">
-            <Link href="/thue-do">
+            <Link href="/rental">
               <Plus className="mr-1.5 h-4 w-4" />
               Xem catalog thuê đồ
             </Link>
