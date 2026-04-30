@@ -9,10 +9,10 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#f3faf8] text-slate-800">
-      <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between bg-gradient-to-r from-[#229b8e] via-[#2ca99c] to-[#21a08f] px-5 text-white shadow-lg shadow-teal-900/10 lg:px-10">
+    <div className="min-h-screen w-full overflow-hidden bg-background text-foreground">
+      <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between bg-gradient-to-r from-primary via-primary/80 to-primary/60 px-5 text-white shadow-lg shadow-primary/10 lg:px-10">
         <Link href="/seller" className="group flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-black text-teal-600 shadow-md transition duration-300 group-hover:scale-110 group-hover:rotate-12">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-black text-primary shadow-md transition duration-300 group-hover:scale-110 group-hover:rotate-12">
             S
           </span>
           <span className="text-sm font-extrabold tracking-widest">
@@ -46,9 +46,9 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="grid min-h-[calc(100vh-72px)] grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="hidden border-r border-teal-100/80 bg-white px-5 py-7 lg:block">
+        <aside className="hidden border-r border-border/80 bg-white px-5 py-7 lg:block">
           <div className="mb-8 flex flex-col items-center border-b border-slate-100 pb-7">
-            <div className="h-28 w-28 rounded-full bg-gradient-to-br from-lime-200 via-emerald-200 to-teal-300 p-2 shadow-xl shadow-teal-900/15 transition duration-500 hover:scale-105 hover:rotate-3">
+            <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 p-2 shadow-xl shadow-primary/15 transition duration-500 hover:scale-105 hover:rotate-3">
               <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-5xl"></div>
             </div>
             <h2 className="mt-4 text-xl font-black text-slate-900">
@@ -72,12 +72,12 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-300 ${
                     active
-                      ? "bg-teal-500 text-white shadow-lg shadow-teal-500/25"
-                      : "text-slate-500 hover:-translate-y-0.5 hover:bg-teal-50 hover:text-teal-700 hover:shadow-md"
+                      ? "bg-primary text-white shadow-lg shadow-primary/25"
+                      : "text-slate-500 hover:-translate-y-0.5 hover:bg-primary/10 hover:text-primary hover:shadow-md"
                   }`}
                 >
                   <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl transition duration-300 group-hover:rotate-6 ${active ? "bg-white/20" : "bg-slate-100 group-hover:bg-teal-100"}`}
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl transition duration-300 group-hover:rotate-6 ${active ? "bg-white/20" : "bg-slate-100 group-hover:bg-primary/10"}`}
                   >
                     <Icon className="h-4 w-4" />
                   </span>
