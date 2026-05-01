@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { tailoringOrders } from "./seller-data"
 import CalendarSection from "./section/calendar-section"
 import DashboardSection from "./section/dashboard-section"
@@ -10,7 +11,7 @@ import StatisticsSection from "./section/statistics-section"
 import TailoringSection from "./section/tailoring-section"
 
 type SellerPageProps = {
-  title: string
+  title: ReactNode
   description: string
   type:
     | "dashboard"

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Bell, ChevronDown, Search } from "lucide-react"
@@ -49,14 +50,17 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
         <aside className="hidden border-r border-border/80 bg-white px-5 py-7 lg:block">
           <div className="mb-8 flex flex-col items-center border-b border-slate-100 pb-7">
             <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 p-2 shadow-xl shadow-primary/15 transition duration-500 hover:scale-105 hover:rotate-3">
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-5xl"></div>
+              <Image
+                src="https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=400&fit=crop"
+                alt="Cosplay avatar"
+                width={88}
+                height={88}
+                className="rounded-full object-cover"
+              />
             </div>
             <h2 className="mt-4 text-xl font-black text-slate-900">
-              Tool Rental
+              cosplay.vn
             </h2>
-            <p className="mt-1 text-xs font-medium text-slate-400">
-              Verified seller account
-            </p>
           </div>
 
           <p className="mb-3 text-xs font-bold tracking-[0.2em] text-slate-400 uppercase">
