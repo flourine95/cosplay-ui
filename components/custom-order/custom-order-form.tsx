@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -65,6 +66,10 @@ const measurements = [
 export function CustomOrderForm() {
   const [date, setDate] = useState<Date>()
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
+  const [projectName, setProjectName] = useState("")
+  const [budget, setBudget] = useState("")
+  const [details, setDetails] = useState("")
+  const router = useRouter()
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,18 +142,21 @@ export function CustomOrderForm() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <button
-                  type="button"
-                  onClick={() =>
-                    uploadedFiles.length === 0 &&
-                    setUploadedFiles([
-                      "raiden_front.jpg",
-                      "raiden_back.jpg",
-                      "raiden_detail.png",
-                    ])
-                  }
-                  className="flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-10 text-center transition-all hover:border-primary/50 hover:bg-primary/5"
-                >
+                <label className="flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-10 text-center transition-all hover:border-primary/50 hover:bg-primary/5">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    multiple
+                    className="sr-only"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        const files = Array.from(e.target.files).map(
+                          (file) => file.name
+                        )
+                        setUploadedFiles((prev) => [...prev, ...files])
+                      }
+                    }}
+                  />
                   <UploadCloud className="mb-3 h-10 w-10 text-muted-foreground" />
                   <p className="font-semibold">Kéo thả ảnh vào đây</p>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -157,7 +165,7 @@ export function CustomOrderForm() {
                   <p className="mt-2 text-xs text-muted-foreground">
                     Tối đa 5 ảnh • JPG, PNG • Dưới 10MB / ảnh
                   </p>
-                </button>
+                </label>
                 {uploadedFiles.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {uploadedFiles.map((f) => (
@@ -203,6 +211,8 @@ export function CustomOrderForm() {
                     <Input
                       id="projectName"
                       placeholder="VD: Genshin Impact – Raiden Shogun"
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -232,6 +242,8 @@ export function CustomOrderForm() {
                     id="details"
                     placeholder="VD: Cổ áo may rộng hơn 2cm, viền dùng vải phi bóng thay vì da, cần móc gắn kiếm ở lưng..."
                     className="min-h-[120px] resize-none"
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -241,6 +253,8 @@ export function CustomOrderForm() {
                       id="budget"
                       type="number"
                       placeholder="VD: 2000000"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
                     />
                     <p className="text-xs text-muted-foreground">
                       Giúp Maker báo giá phù hợp hơn
@@ -347,12 +361,17 @@ export function CustomOrderForm() {
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 {[
-                  { label: "Nhân vật", value: "Raiden Shogun" },
+                  { label: "Nhân vật", value: projectName || "Chưa nhập" },
                   {
                     label: "Deadline",
                     value: date ? format(date, "dd/MM/yyyy") : "Chưa chọn",
                   },
-                  { label: "Ngân sách", value: "2,000,000 đ" },
+                  {
+                    label: "Ngân sách",
+                    value: budget
+                      ? `${Number(budget).toLocaleString()} đ`
+                      : "Chưa nhập",
+                  },
                   {
                     label: "Ảnh tham khảo",
                     value:
@@ -385,11 +404,26 @@ export function CustomOrderForm() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-2 border-t pt-4">
-                <Button asChild size="lg" className="w-full font-semibold">
-                  <Link href="/custom-order/1">
-                    <Scissors className="mr-2 h-4 w-4" />
-                    Gửi yêu cầu Báo giá
-                  </Link>
+                <Button
+                  size="lg"
+                  className="w-full font-semibold"
+                  onClick={() => {
+                    if (
+                      !projectName.trim() ||
+                      !details.trim() ||
+                      !date ||
+                      uploadedFiles.length === 0
+                    ) {
+                      alert(
+                        "Vui lòng điền đầy đủ Tên nhân vật, Ảnh tham khảo, Mô tả chi tiết và Ngày nhận hàng!"
+                      )
+                      return
+                    }
+                    router.push("/custom-order/1")
+                  }}
+                >
+                  <Scissors className="mr-2 h-4 w-4" />
+                  Gửi yêu cầu Báo giá
                 </Button>
                 <Button
                   variant="ghost"

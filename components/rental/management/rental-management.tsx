@@ -284,7 +284,7 @@ function RentalCard({ rental }: { rental: (typeof rentals)[0] }) {
                 variant="ghost"
                 className="gap-1.5 text-muted-foreground"
               >
-                <Link href="/rental/1">
+                <Link href={`/rental/${rental.id}`}>
                   <ExternalLink className="h-3.5 w-3.5" />
                   Chi tiết
                 </Link>
@@ -411,7 +411,7 @@ export function RentalManagement() {
             ["active", "pending", "returning", "completed"] as RentalStatus[]
           ).map((status) => (
             <TabsContent key={status} value={status} className="space-y-4">
-              {rentals
+              {filtered
                 .filter((r) => r.status === status)
                 .map((r) => (
                   <RentalCard key={r.id} rental={r} />

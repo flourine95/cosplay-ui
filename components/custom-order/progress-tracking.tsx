@@ -411,7 +411,15 @@ export function ProgressTracking() {
 
               <Separator />
               <CardFooter className="shrink-0 p-3">
-                <form className="flex w-full items-center gap-2">
+                <form
+                  className="flex w-full items-center gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (message.trim()) {
+                      setMessage("")
+                    }
+                  }}
+                >
                   <Button
                     type="button"
                     variant="ghost"
