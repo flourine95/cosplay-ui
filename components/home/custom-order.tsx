@@ -74,7 +74,7 @@ export function CustomOrder() {
 
         <div className="mt-12 flex justify-start">
           <Button size="lg" className="rounded-full px-8" asChild>
-            <Link href="#custom-form">Đặt may ngay</Link>
+            <Link href="/custom-order">Đặt may ngay</Link>
           </Button>
         </div>
       </div>
