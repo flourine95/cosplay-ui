@@ -3,7 +3,7 @@
 import type { ReactNode } from "react"
 import { tailoringOrders } from "./seller-data"
 import CalendarSection from "./section/calendar-section"
-import DashboardSection from "./section/dashboard-section"
+import { DashboardSectionNew } from "./section/dashboard-section"
 import OrdersSection from "./section/orders-section"
 import ProductsSection from "./section/products-section"
 import RevenueSection from "./section/revenue-section"
@@ -47,7 +47,7 @@ export function SellerPage({ title, description, type }: SellerPageProps) {
         </div>
       </section>
 
-      {type === "dashboard" && <DashboardSection />}
+      {type === "dashboard" && <DashboardSectionNew />}
       {type === "products" && <ProductsSection />}
       {type === "orders" && <OrdersSection />}
       {type === "tailoring" && <TailoringSection data={tailoringOrders} />}
