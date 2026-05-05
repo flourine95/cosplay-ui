@@ -233,7 +233,6 @@ export const tailoringOrders: TailoringOrder[] = [
       {
         text: "Phần eo hơi rộng so với mình, shop bóp vào 2cm giúp mình nhé. Ren chân váy cho dài thêm 5cm được không ạ?",
         time: "2 giờ trước",
-        status: "pending",
       },
     ],
   },

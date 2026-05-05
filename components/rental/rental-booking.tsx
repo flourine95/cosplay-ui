@@ -154,7 +154,6 @@ export function RentalBooking() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center pb-6">
-                {/* @ts-expect-error – shadcn Calendar range mode */}
                 <Calendar
                   initialFocus
                   mode="range"
