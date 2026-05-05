@@ -1,9 +1,9 @@
-import { SellerShell } from "@/components/seller/seller-shell"
+import { SellerShellNew } from "@/components/seller/seller-shell"
 
 export default function SellerLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <SellerShell>{children}</SellerShell>
+  return <SellerShellNew>{children}</SellerShellNew>
 }
