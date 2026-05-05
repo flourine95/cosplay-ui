@@ -794,16 +794,28 @@ export const reviews: Review[] = [
     helpful: 15,
   },
   {
-    id: "5",
-    productSlug: "batman",
-    userName: "Hoàng Thị E",
+    id: "6",
+    productSlug: "naruto-uzumaki",
+    userName: "Trần Minh Khoa",
     rating: 5,
-    title: "Batman đích thực!",
+    title: "Chất lượng tốt, giao nhanh",
     comment:
-      "Chất liệu giả da rất tốt, đệm cơ bắp tạo cảm giác thật. Mặt nạ và áo choàng đi kèm rất tiện lợi. Đáng đồng tiền!",
-    createdAt: new Date("2024-03-14"),
+      "Áo khoác cam rất đẹp, chất cotton mềm mại, màu sắc trung thực. Mặc đi event được nhiều người hỏi mua.",
+    createdAt: new Date("2024-02-20"),
     verified: true,
-    helpful: 20,
+    helpful: 24,
+  },
+  {
+    id: "7",
+    productSlug: "naruto-uzumaki",
+    userName: "Nguyễn Thị Lan",
+    rating: 4,
+    title: "Ổn, nhưng size hơi rộng",
+    comment:
+      "Trang phục đẹp, đường may chắc chắn. Tuy nhiên size M hơi rộng hơn mình nghĩ, nên order size S nếu dáng nhỏ.",
+    createdAt: new Date("2024-02-15"),
+    verified: true,
+    helpful: 18,
   },
 ]
 

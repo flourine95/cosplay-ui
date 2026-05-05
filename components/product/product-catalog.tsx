@@ -263,7 +263,7 @@ function ProductCard({ product }: { product: Product }) {
               </Link>
               {product.canRent && (
                 <Link
-                  href={`/rental/${product.slug}`}
+                  href={`/products/${product.slug}`}
                   onClick={(e) => e.stopPropagation()}
                   className="flex-1 rounded-full bg-white/20 py-2 text-center text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/30"
                 >
