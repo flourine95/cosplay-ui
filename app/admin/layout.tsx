@@ -1,6 +1,3 @@
-"use client"
-
-import { useState } from "react"
 import Sidebar from "@/components/admin/sidebar"
 import Header from "@/components/admin/header"
 
@@ -9,19 +6,19 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
-
   return (
-    <div className="flex h-screen bg-[#f1f5f9]">
-      <Sidebar
-        isSidebarCollapsed={isSidebarCollapsed}
-        setSidebarCollapsed={setSidebarCollapsed}
-      />
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Admin Mode Indicator - Top border */}
+      <div className="h-1 bg-primary" />
 
-      <main className="flex flex-1 flex-col">
-        <Header />
-        <div className="flex-1 overflow-y-auto p-8">{children}</div>
-      </main>
+      {/* Header */}
+      <Header />
+
+      {/* Content with Sidebar */}
+      <div className="flex flex-1">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
     </div>
   )
 }
