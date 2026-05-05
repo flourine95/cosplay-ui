@@ -20,44 +20,43 @@ export const metadata = {
 
 export default function CartPage() {
   return (
-    <main className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <AnnouncementBar />
       <Navbar />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-8">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Trang chủ</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Giỏ hàng</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <main className="flex-1">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+          {/* Breadcrumb */}
+          <Breadcrumb className="mb-8">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Trang chủ</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Giỏ hàng</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-        {/* Page title */}
-        <h1 className="mb-8 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-          Giỏ hàng của bạn
-        </h1>
+          {/* Page title */}
+          <h1 className="mb-8 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            Giỏ hàng của bạn
+          </h1>
 
-        {/* Main content */}
-        <div className="grid gap-8 md:grid-cols-3 lg:grid-cols-4">
-          {/* Cart items */}
-          <div className="md:col-span-2 lg:col-span-3">
-            <CartItems />
+          {/* Main content */}
+          <div className="grid gap-8 md:grid-cols-3 lg:grid-cols-4">
+            <div className="md:col-span-2 lg:col-span-3">
+              <CartItems />
+            </div>
+            <CartSummary />
           </div>
-
-          {/* Cart summary */}
-          <CartSummary />
         </div>
-      </div>
+      </main>
 
       <Footer />
-    </main>
+    </div>
   )
 }
