@@ -1,0 +1,882 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CUSTOMER
+  SELLER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum SellerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+model User {
+  id              Int        @id @default(autoincrement())
+  email           String     @unique
+  password        String
+  name            String
+  phone           String?
+  avatar          String?
+  role            UserRole   @default(CUSTOMER)
+  status          UserStatus @default(PENDING_VERIFICATION)
+  emailVerified   Boolean    @default(false)
+  emailVerifiedAt DateTime?
+
+  // Thông tin địa chỉ
+  address  String?
+  city     String?
+  district String?
+  ward     String?
+
+  // ===== THÔNG TIN SELLER (chỉ dùng khi role = SELLER) =====
+  // Thông tin shop
+  shopName        String?
+  shopDescription String?
+  shopLogo        String?
+  shopBanner      String?
+
+  // Thông tin kinh doanh
+  businessLicense String?
+  taxCode         String?
+  bankName        String?
+  bankAccount     String?
+  bankAccountName String?
+
+  // Trạng thái seller
+  sellerStatus     SellerStatus?
+  sellerApprovedAt DateTime?
+  sellerApprovedBy Int?
+
+  // Đánh giá seller
+  sellerRating       Float @default(0)
+  sellerTotalReviews Int   @default(0)
+  sellerTotalSales   Int   @default(0)
+  // ===== KẾT THÚC THÔNG TIN SELLER =====
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  // Relations - Chung cho tất cả user
+  measurements   Measurement[]
+  cartItems      CartItem[]
+  reviews        Review[]
+  comments       Comment[]
+  rentalOrders   RentalOrder[]
+  notifications  Notification[]
+  passwordResets PasswordReset[]
+
+  // Relations - Đơn hàng mua bán (phân biệt buyer/seller)
+  ordersAsBuyer  Order[] @relation("CustomerOrders")
+  ordersAsSeller Order[] @relation("SellerOrders")
+
+  // Relations - Đặt may đo (phân biệt customer/seller)
+  customOrdersAsBuyer  CustomOrder[] @relation("CustomerCustomOrders")
+  customOrdersAsSeller CustomOrder[] @relation("SellerCustomOrders")
+
+  // Relations - Chỉ dùng khi role = SELLER
+  products          Product[]
+  customOrderQuotes CustomOrderQuote[]
+  rentalItems       RentalItem[]
+
+  // Relations - Messaging
+  conversationsAsUser1 Conversation[] @relation("ConversationsAsUser1")
+  conversationsAsUser2 Conversation[] @relation("ConversationsAsUser2")
+  sentMessages         Message[]      @relation("SentMessages")
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([sellerStatus])
+}
+
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+// ============================================
+// DANH MỤC & SẢN PHẨM
+// ============================================
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String
+  slug        String  @unique
+  description String?
+  image       String?
+  parentId    Int?
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+enum ProductType {
+  SALE // Bán
+  RENTAL // Cho thuê
+  BOTH // Cả hai
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+model Product {
+  id         Int @id @default(autoincrement())
+  sellerId   Int
+  categoryId Int
+
+  // Thông tin cơ bản
+  name             String
+  slug             String  @unique
+  description      String?
+  shortDescription String?
+
+  // Giá & Kho
+  price        Decimal  @db.Decimal(10, 2)
+  comparePrice Decimal? @db.Decimal(10, 2) // Giá gốc để hiển thị giảm giá
+  stock        Int      @default(0)
+  sku          String?  @unique
+
+  // Loại sản phẩm
+  type   ProductType   @default(SALE)
+  status ProductStatus @default(DRAFT)
+
+  // Thông tin cho thuê (nếu type = RENTAL hoặc BOTH)
+  rentalPricePerDay Decimal? @db.Decimal(10, 2)
+  depositAmount     Decimal? @db.Decimal(10, 2)
+  minRentalDays     Int?     @default(1)
+  maxRentalDays     Int?
+
+  // SEO & Marketing
+  metaTitle       String?
+  metaDescription String?
+  tags            String[]
+
+  // Đánh giá
+  rating      Float @default(0)
+  reviewCount Int   @default(0)
+  viewCount   Int   @default(0)
+  soldCount   Int   @default(0)
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  seller     User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  category   Category         @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  variants   ProductVariant[]
+  reviews    Review[]
+  comments   Comment[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  rentalItem RentalItem?
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([slug])
+  @@index([status])
+  @@index([type])
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  url       String
+  alt       String?
+  order     Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductVariant {
+  id        Int @id @default(autoincrement())
+  productId Int
+
+  // Biến thể (size, màu sắc, v.v.)
+  name  String // VD: "Size M - Màu Đỏ"
+  sku   String?  @unique
+  price Decimal? @db.Decimal(10, 2) // Giá riêng nếu khác với sản phẩm chính
+  stock Int      @default(0)
+
+  // Thuộc tính
+  attributes Json // VD: { "size": "M", "color": "red" }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([productId])
+  @@index([sku])
+}
+
+// ============================================
+// GIỎ HÀNG
+// ============================================
+
+model CartItem {
+  id        Int  @id @default(autoincrement())
+  userId    Int
+  productId Int
+  variantId Int?
+  quantity  Int  @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, variantId])
+  @@index([userId])
+}
+
+// ============================================
+// ĐƠN HÀNG MUA BÁN
+// ============================================
+
+enum OrderStatus {
+  PENDING // Chờ xác nhận
+  CONFIRMED // Đã xác nhận
+  PROCESSING // Đang xử lý
+  SHIPPING // Đang giao hàng
+  DELIVERED // Đã giao hàng
+  COMPLETED // Hoàn thành
+  CANCELLED // Đã hủy
+  REFUNDED // Đã hoàn tiền
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIAL
+}
+
+enum PaymentMethod {
+  COD // Thanh toán khi nhận hàng
+  BANK_TRANSFER // Chuyển khoản
+  MOMO
+  VNPAY
+  ZALOPAY
+  CREDIT_CARD
+}
+
+model Order {
+  id          Int    @id @default(autoincrement())
+  userId      Int // ID người mua
+  sellerId    Int // ID người bán
+  orderNumber String @unique
+
+  // Thông tin giao hàng
+  shippingName     String
+  shippingPhone    String
+  shippingAddress  String
+  shippingCity     String
+  shippingDistrict String
+  shippingWard     String
+  shippingNote     String?
+
+  // Giá & Phí
+  subtotal    Decimal @db.Decimal(10, 2)
+  shippingFee Decimal @default(0) @db.Decimal(10, 2)
+  discount    Decimal @default(0) @db.Decimal(10, 2)
+  tax         Decimal @default(0) @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+
+  // Trạng thái
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod
+
+  // Ghi chú
+  customerNote String?
+  adminNote    String?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  // Relations
+  user          User                 @relation("CustomerOrders", fields: [userId], references: [id])
+  seller        User                 @relation("SellerOrders", fields: [sellerId], references: [id])
+  items         OrderItem[]
+  payments      Payment[]
+  statusHistory OrderStatusHistory[]
+  reviews       Review[]
+
+  @@index([userId])
+  @@index([sellerId])
+  @@index([orderNumber])
+  @@index([status])
+}
+
+model OrderItem {
+  id        Int  @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  variantId Int?
+
+  productName String // Lưu tên sản phẩm tại thời điểm đặt hàng
+  variantName String?
+  price       Decimal @db.Decimal(10, 2)
+  quantity    Int
+  subtotal    Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id        Int         @id @default(autoincrement())
+  orderId   Int
+  status    OrderStatus
+  note      String?
+  createdBy Int?
+  createdAt DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// ============================================
+// THANH TOÁN
+// ============================================
+
+enum PaymentType {
+  ORDER // Thanh toán đơn hàng
+  CUSTOM_DEPOSIT // Cọc đặt may
+  CUSTOM_FINAL // Thanh toán cuối đặt may
+  RENTAL_DEPOSIT // Cọc thuê đồ
+  RENTAL_FEE // Phí thuê
+}
+
+model Payment {
+  id            Int  @id @default(autoincrement())
+  orderId       Int?
+  customOrderId Int?
+  rentalOrderId Int?
+
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod
+  paymentType   PaymentType
+  status        PaymentStatus @default(PENDING)
+
+  // Thông tin giao dịch
+  transactionId   String? @unique
+  transactionData Json? // Lưu response từ payment gateway
+
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  order       Order?       @relation(fields: [orderId], references: [id])
+  customOrder CustomOrder? @relation(fields: [customOrderId], references: [id])
+  rentalOrder RentalOrder? @relation(fields: [rentalOrderId], references: [id])
+
+  @@index([orderId])
+  @@index([customOrderId])
+  @@index([rentalOrderId])
+  @@index([transactionId])
+}
+
+// ============================================
+// ĐÁNH GIÁ & BÌNH LUẬN
+// ============================================
+
+model Review {
+  id        Int  @id @default(autoincrement())
+  userId    Int
+  productId Int
+  orderId   Int? // Chỉ cho phép đánh giá nếu đã mua
+
+  rating  Int // 1-5 sao
+  title   String?
+  content String
+  images  String[]
+
+  // Phản hồi từ seller
+  sellerReply String?
+  repliedAt   DateTime?
+
+  isVerified  Boolean @default(false) // Đã mua hàng
+  isPublished Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+  @@index([orderId])
+  @@index([rating])
+}
+
+model Comment {
+  id        Int  @id @default(autoincrement())
+  userId    Int
+  productId Int
+  parentId  Int? // Cho phép trả lời comment
+
+  content     String
+  isPublished Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([userId])
+  @@index([productId])
+  @@index([parentId])
+}
+
+// ============================================
+// ĐẶT MAY (CUSTOM ORDER)
+// ============================================
+
+enum CustomOrderStatus {
+  DRAFT // Khách đang soạn
+  SUBMITTED // Đã gửi yêu cầu
+  QUOTED // Seller đã báo giá
+  QUOTE_ACCEPTED // Khách chấp nhận báo giá
+  DEPOSIT_PAID // Đã thanh toán cọc
+  IN_PROGRESS // Đang gia công
+  REVISION_REQUESTED // Yêu cầu chỉnh sửa
+  READY // Hoàn thành, chờ nghiệm thu
+  COMPLETED // Đã nghiệm thu & thanh toán
+  CANCELLED // Đã hủy
+}
+
+model Measurement {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  name   String // VD: "Số đo mặc định", "Số đo cosplay Naruto"
+
+  // Số đo cơ thể
+  height    Float?
+  weight    Float?
+  chest     Float?
+  waist     Float?
+  hips      Float?
+  shoulder  Float?
+  armLength Float?
+  legLength Float?
+  neck      Float?
+
+  // Số đo bổ sung (JSON để linh hoạt)
+  additionalMeasurements Json?
+
+  notes     String?
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customOrders CustomOrder[]
+
+  @@index([userId])
+}
+
+model CustomOrder {
+  id            Int    @id @default(autoincrement())
+  userId        Int // ID khách đặt may
+  sellerId      Int // ID shop nhận may
+  measurementId Int?
+  orderNumber   String @unique
+
+  // Thông tin yêu cầu
+  title           String
+  description     String
+  referenceImages String[]
+  characterName   String?
+  animeName       String?
+
+  // Yêu cầu đặc biệt
+  specialRequests String?
+  deadline        DateTime?
+
+  // Trạng thái
+  status CustomOrderStatus @default(DRAFT)
+
+  // Giá & Thanh toán
+  estimatedPrice Decimal? @db.Decimal(10, 2)
+  depositAmount  Decimal? @db.Decimal(10, 2)
+  finalAmount    Decimal? @db.Decimal(10, 2)
+  totalPaid      Decimal  @default(0) @db.Decimal(10, 2)
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  submittedAt DateTime?
+  acceptedAt  DateTime?
+  completedAt DateTime?
+
+  // Relations
+  user            User                  @relation("CustomerCustomOrders", fields: [userId], references: [id])
+  seller          User                  @relation("SellerCustomOrders", fields: [sellerId], references: [id])
+  measurement     Measurement?          @relation(fields: [measurementId], references: [id])
+  quotes          CustomOrderQuote[]
+  progressUpdates CustomOrderProgress[]
+  revisions       CustomOrderRevision[]
+  payments        Payment[]
+
+  @@index([userId])
+  @@index([sellerId])
+  @@index([orderNumber])
+  @@index([status])
+}
+
+model CustomOrderQuote {
+  id            Int @id @default(autoincrement())
+  customOrderId Int
+  sellerId      Int
+
+  // Báo giá
+  quotedPrice   Decimal @db.Decimal(10, 2)
+  depositAmount Decimal @db.Decimal(10, 2)
+  estimatedDays Int
+  description   String?
+
+  // Trạng thái
+  isAccepted Boolean @default(false)
+  isRejected Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customOrder CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+  seller      User        @relation(fields: [sellerId], references: [id])
+
+  @@index([customOrderId])
+  @@index([sellerId])
+}
+
+model CustomOrderProgress {
+  id            Int @id @default(autoincrement())
+  customOrderId Int
+
+  title           String
+  description     String
+  images          String[]
+  progressPercent Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  customOrder CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  @@index([customOrderId])
+}
+
+model CustomOrderRevision {
+  id            Int @id @default(autoincrement())
+  customOrderId Int
+
+  description String
+  images      String[]
+
+  // Phản hồi từ seller
+  sellerResponse String?
+  respondedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  customOrder CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  @@index([customOrderId])
+}
+
+// ============================================
+// CHO THUÊ ĐỒ (RENTAL)
+// ============================================
+
+enum RentalStatus {
+  PENDING // Chờ xác nhận
+  CONFIRMED // Đã xác nhận
+  DEPOSIT_PAID // Đã thanh toán cọc
+  READY_FOR_PICKUP // Sẵn sàng lấy đồ
+  RENTED // Đang thuê
+  RETURNED // Đã trả đồ
+  DEPOSIT_REFUNDED // Đã hoàn cọc
+  COMPLETED // Hoàn thành
+  CANCELLED // Đã hủy
+  OVERDUE // Quá hạn
+}
+
+enum RentalItemCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  DAMAGED
+}
+
+model RentalItem {
+  id        Int @id @default(autoincrement())
+  productId Int @unique
+  sellerId  Int
+
+  // Thông tin cho thuê
+  pricePerDay   Decimal @db.Decimal(10, 2)
+  depositAmount Decimal @db.Decimal(10, 2)
+  minDays       Int     @default(1)
+  maxDays       Int?
+
+  // Tình trạng
+  condition   RentalItemCondition @default(EXCELLENT)
+  isAvailable Boolean             @default(true)
+
+  // Lịch không khả dụng
+  unavailableDates Json? // Array of date ranges
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  seller       User          @relation(fields: [sellerId], references: [id])
+  rentalOrders RentalOrder[]
+
+  @@index([sellerId])
+  @@index([isAvailable])
+}
+
+model RentalOrder {
+  id           Int    @id @default(autoincrement())
+  userId       Int
+  rentalItemId Int
+  orderNumber  String @unique
+
+  // Thời gian thuê
+  startDate        DateTime
+  endDate          DateTime
+  actualReturnDate DateTime?
+
+  // Giá & Phí
+  pricePerDay   Decimal @db.Decimal(10, 2)
+  totalDays     Int
+  rentalFee     Decimal @db.Decimal(10, 2)
+  depositAmount Decimal @db.Decimal(10, 2)
+  lateFee       Decimal @default(0) @db.Decimal(10, 2)
+  damageFee     Decimal @default(0) @db.Decimal(10, 2)
+  refundAmount  Decimal @default(0) @db.Decimal(10, 2)
+
+  // Trạng thái
+  status RentalStatus @default(PENDING)
+
+  // Tình trạng đồ
+  conditionAtPickup RentalItemCondition?
+  conditionAtReturn RentalItemCondition?
+  pickupNotes       String?
+  returnNotes       String?
+  damageDescription String?
+  damageImages      String[]
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  pickedUpAt  DateTime?
+  returnedAt  DateTime?
+  completedAt DateTime?
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id])
+  rentalItem RentalItem @relation(fields: [rentalItemId], references: [id])
+  payments   Payment[]
+
+  @@index([userId])
+  @@index([rentalItemId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+// ============================================
+// THÔNG BÁO
+// ============================================
+
+enum NotificationType {
+  ORDER_STATUS
+  PAYMENT
+  CUSTOM_ORDER
+  RENTAL
+  REVIEW
+  SYSTEM
+  PROMOTION
+}
+
+model Notification {
+  id      Int              @id @default(autoincrement())
+  userId  Int
+  type    NotificationType
+  title   String
+  content String
+  link    String?
+  data    Json?
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// ============================================
+// CÀI ĐẶT HỆ THỐNG & PHÍ
+// ============================================
+
+model SystemFee {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  // Phí có thể là % hoặc số tiền cố định
+  feeType  String // PERCENTAGE hoặc FIXED
+  feeValue Decimal @db.Decimal(10, 2)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model SystemSetting {
+  id          Int     @id @default(autoincrement())
+  key         String  @unique
+  value       String
+  description String?
+
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+// ============================================
+// MESSAGING SYSTEM
+// ============================================
+
+model Conversation {
+  id      Int @id @default(autoincrement())
+  user1Id Int // User 1 (thường là customer)
+  user2Id Int // User 2 (thường là seller)
+
+  // Liên kết với đơn hàng (optional)
+  orderId       Int?
+  customOrderId Int?
+  rentalOrderId Int?
+
+  lastMessageAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user1    User      @relation("ConversationsAsUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2    User      @relation("ConversationsAsUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([user1Id, user2Id]) // Mỗi cặp user chỉ có 1 conversation
+  @@index([user1Id])
+  @@index([user2Id])
+  @@index([orderId])
+  @@index([customOrderId])
+  @@index([rentalOrderId])
+}
+
+model Message {
+  id             Int @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+
+  content     String   @db.Text
+  attachments String[] // URLs to images/files
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+}
