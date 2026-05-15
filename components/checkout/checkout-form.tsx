@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { useCart } from "@/lib/cart-context"
+import { useCart } from "@/stores/cart-store"
 import { Loader2 } from "lucide-react"
 
 export function CheckoutForm() {

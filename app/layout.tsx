@@ -1,8 +1,8 @@
 import { Be_Vietnam_Pro as BeVietnamPro } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/lib/auth-context"
-import { CartProvider } from "@/lib/cart-context"
+import { AuthProvider } from "@/providers/auth-provider"
+import { QueryProvider } from "@/providers/query-provider"
 import { cn } from "@/lib/utils"
 import "./globals.css"
 
@@ -25,11 +25,11 @@ export default function RootLayout({
       className={cn("font-sans antialiased", beVietnamPro.variable)}
     >
       <body>
-        <ThemeProvider>
-          <AuthProvider>
-            <CartProvider>{children}</CartProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   )

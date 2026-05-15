@@ -1,6 +1,6 @@
 "use client"
 
-import { useCart } from "@/lib/cart-context"
+import { useCart } from "@/stores/cart-store"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ArrowRight, Truck, RotateCcw, Shield } from "lucide-react"

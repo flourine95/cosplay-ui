@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { formatPrice } from "@/lib/utils"
-import { useCart } from "@/lib/cart-context"
+import { useCart } from "@/stores/cart-store"
 import { toast } from "sonner"
 import type { Product } from "@/lib/products"
 
