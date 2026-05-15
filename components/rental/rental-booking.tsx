@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { format, differenceInDays } from "date-fns"
 import {
   Calendar as CalendarIcon,

@@ -106,7 +106,7 @@ export function ProductReviews({ product }: ProductReviewsProps) {
                       style={{
                         width:
                           totalReviews > 0
-                            ? `${(ratingCounts[index] / totalReviews) * 100}%`
+                            ? `${((ratingCounts[index] ?? 0) / totalReviews) * 100}%`
                             : "0%",
                       }}
                     />

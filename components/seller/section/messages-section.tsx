@@ -29,7 +29,7 @@ import {
 
 export function MessagesSectionNew() {
   const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(conversations[0])
+    useState<Conversation | null>(conversations[0] ?? null)
   const [searchQuery, setSearchQuery] = useState("")
   const [messageInput, setMessageInput] = useState("")
 

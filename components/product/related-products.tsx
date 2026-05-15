@@ -22,7 +22,7 @@ export function RelatedProducts({ products }: { products: Product[] }) {
           >
             <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
               <Image
-                src={product.images[0]}
+                src={product.images[0] ?? ""}
                 alt={`Trang phục ${product.name} từ ${product.series}`}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"

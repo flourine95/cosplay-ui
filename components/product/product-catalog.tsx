@@ -210,8 +210,8 @@ function FilterSidebar({
           step={50000}
           value={[priceMin, priceMax]}
           onValueChange={([min, max]) => {
-            onPriceMinChange(min)
-            onPriceMax(max)
+            onPriceMinChange(min ?? priceMin)
+            onPriceMax(max ?? priceMax)
           }}
           className="w-full"
         />
@@ -243,7 +243,7 @@ function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted">
         <Image
-          src={product.images[0]}
+          src={product.images[0] ?? ""}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"

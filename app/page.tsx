@@ -22,6 +22,8 @@ import { Featured } from "@/components/home/featured"
 import { StarRating } from "@/components/common/star-rating"
 
 export default function Page() {
+  const firstService = services[0]!
+  const firstReview = reviews[0]!
   return (
     <main className="min-h-screen">
       <AnnouncementBar />
@@ -155,12 +157,12 @@ export default function Page() {
           </div>
           <div className="grid gap-3 lg:grid-cols-5 lg:grid-rows-2">
             <Link
-              href={services[0].href}
+              href={firstService.href}
               className="group relative min-h-120 overflow-hidden rounded-2xl lg:col-span-3 lg:row-span-2"
             >
               <Image
-                src={services[0].image}
-                alt={services[0].title}
+                src={firstService.image}
+                alt={firstService.title}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 sizes="(max-width: 1024px) 100vw, 60vw"
@@ -168,20 +170,20 @@ export default function Page() {
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-end p-8">
                 <span className="mb-2 text-xs font-bold tracking-[0.15em] text-white/60 uppercase">
-                  {services[0].label}
+                  {firstService.label}
                 </span>
                 <h3 className="text-3xl font-extrabold text-white">
-                  {services[0].title}
+                  {firstService.title}
                 </h3>
                 <p className="mt-2 max-w-[40ch] text-sm leading-relaxed text-white/70">
-                  {services[0].desc}
+                  {firstService.desc}
                 </p>
                 <div className="mt-5 flex items-center justify-between">
                   <span className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-                    {services[0].detail}
+                    {firstService.detail}
                   </span>
                   <span className="flex items-center gap-1.5 text-sm font-semibold text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    {services[0].cta} <ArrowRight className="size-4" />
+                    {firstService.cta} <ArrowRight className="size-4" />
                   </span>
                 </div>
               </div>
@@ -615,24 +617,27 @@ export default function Page() {
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="flex flex-col justify-between gap-6 rounded-2xl bg-foreground p-8 text-background lg:row-span-2">
               <div className="flex flex-col gap-4">
-                <StarRating rating={reviews[0].rating} size="md" />
+                <StarRating rating={firstReview.rating} size="md" />
                 <p className="text-xl leading-relaxed font-medium text-background/90">
-                  &ldquo;{reviews[0].comment}&rdquo;
+                  &ldquo;{firstReview.comment}&rdquo;
                 </p>
               </div>
               <div className="flex items-center gap-3 border-t border-background/10 pt-5">
                 <Avatar className="size-10">
-                  <AvatarImage src={reviews[0].avatar} alt={reviews[0].name} />
+                  <AvatarImage
+                    src={firstReview.avatar}
+                    alt={firstReview.name}
+                  />
                   <AvatarFallback className="bg-background/20 text-background">
-                    {reviews[0].initials}
+                    {firstReview.initials}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-sm font-semibold text-background">
-                    {reviews[0].name}
+                    {firstReview.name}
                   </p>
                   <p className="text-xs text-background/50">
-                    {reviews[0].service}
+                    {firstReview.service}
                   </p>
                 </div>
               </div>

@@ -51,7 +51,7 @@ export function ProductInfo({ product }: { product: Product }) {
       size: selectedSize,
       type: mode,
       rentDays: mode === "rent" ? rentDays : undefined,
-      image: product.images[0],
+      image: product.images[0] ?? "",
     })
 
     toast.success(
