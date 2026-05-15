@@ -1,37 +1,66 @@
-# cosplay-ui
+# Cosplay Marketplace
 
-Website cosplay được xây dựng bằng **Next.js**, **React** và **Tailwind CSS**.
+Nền tảng thương mại điện tử chuyên về trang phục cosplay.
 
-## Bắt đầu
+## Tech Stack
 
-### Cài đặt dependencies
+- **Frontend:** Next.js 16, React 19, TypeScript
+- **Styling:** Tailwind CSS 4, shadcn/ui
+- **Database:** PostgreSQL (Supabase Local)
+- **ORM:** Prisma 7
+- **Auth & Storage:** Supabase
+- **State Management:** Zustand, React Query
+- **Forms:** React Hook Form, Zod
 
-Sau khi clone project về, chạy lệnh:
+## Cài đặt
+
+### Yêu cầu
+
+- Node.js >= 18
+- Docker Desktop
+- Supabase CLI: `npm install -g supabase` ([docs](https://supabase.com/docs/guides/local-development))
+
+### Setup
 
 ```bash
+# 1. Clone repo
+git clone https://github.com/flourine95/cosplay
+cd cosplay
+
+# 2. Install dependencies
 npm ci
-```
 
-Lệnh này cài đặt chính xác theo `package-lock.json`, đảm bảo mọi người trong team có cùng phiên bản thư viện. Nhanh hơn và tránh conflict không đáng có.
+# 3. Copy .env
+cp .env.example .env
 
-**Khi nào dùng `npm install`?**  
-Chỉ khi bạn cần thêm/xóa/cập nhật package mới. Lệnh này sẽ thay đổi `package-lock.json`, nhớ commit cả file này lên.
+# 4. Start Supabase local
+npm run db:start
 
-### Chạy development server
+# 5. Chạy Prisma migrations (tạo bảng)
+npm run db:migrate
 
-```bash
+# 6. Seed dữ liệu mẫu
+npm run db:seed
+
+# 7. Start dev server
 npm run dev
 ```
 
-Mở trình duyệt và vào `http://localhost:3000` để xem kết quả. Code thay đổi sẽ tự động reload.
+Mở http://localhost:3000
 
-### Build production
+## Tài khoản demo
 
-Khi cần deploy hoặc test bản production:
+| Role     | Email               | Password        |
+| -------- | ------------------- | --------------- |
+| Admin    | admin@cosplay.vn    | Admin@123456    |
+| Seller   | seller@cosplay.vn   | Seller@123456   |
+| Customer | customer@cosplay.vn | Customer@123456 |
 
-```bash
-npm run build
-npm run start
-```
+## Documentation
 
-Lệnh `build` sẽ tối ưu code, sau đó `start` chạy server production.
+- [Setup Guide](docs/SETUP.md) - Hướng dẫn cài đặt chi tiết
+- [Code Conventions](docs/CONVENTIONS.md) - Quy ước code và naming
+- [Common Patterns](docs/PATTERNS.md) - Patterns và examples thường dùng
+- [Code Standards](docs/CODE_STANDARDS.md) - Chuẩn code hiện đại
+- [Business Flows](docs/BUSINESS_FLOWS.md) - Luồng nghiệp vụ
+- [Database Guide](docs/DATABASE_GUIDE.md) - Hướng dẫn database

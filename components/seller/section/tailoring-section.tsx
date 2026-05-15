@@ -32,7 +32,7 @@ export type TailoringOrder = {
 
 export function TailoringSectionNew() {
   const [selectedOrder, setSelectedOrder] = useState<TailoringOrder | null>(
-    tailoringOrders[0]
+    tailoringOrders[0] ?? null
   )
   const [replyText, setReplyText] = useState("")
 

@@ -309,7 +309,10 @@ export const quickActions = [Search, Bell, Settings, Truck]
 
 // Utility functions for date parsing and sorting
 export function parseDateString(dateStr: string): Date {
-  const [day, month, year] = dateStr.split("/").map(Number)
+  const parts = dateStr.split("/").map(Number)
+  const day = parts[0] ?? 1
+  const month = parts[1] ?? 1
+  const year = parts[2] ?? 2000
   return new Date(year, month - 1, day)
 }
 

@@ -17,7 +17,7 @@ export function ProductGallery({ images, name }: Props) {
       {/* Main image */}
       <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-muted">
         <Image
-          src={images[active]}
+          src={images[active] ?? ""}
           alt={`Trang phục ${name} — ảnh ${active + 1}`}
           fill
           priority

@@ -1,11 +1,12 @@
-import { Be_Vietnam_Pro } from "next/font/google"
+import { Be_Vietnam_Pro as BeVietnamPro } from "next/font/google"
 
-import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/lib/auth-context"
 import { CartProvider } from "@/lib/cart-context"
 import { cn } from "@/lib/utils"
+import "./globals.css"
 
-const beVietnamPro = Be_Vietnam_Pro({
+const beVietnamPro = BeVietnamPro({
   subsets: ["vietnamese", "latin"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
@@ -25,7 +26,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <CartProvider>{children}</CartProvider>
+          <AuthProvider>
+            <CartProvider>{children}</CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
