@@ -2,22 +2,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { hashPassword, createSession, sanitizeUser } from "@/lib/auth"
 import { UserRole, UserStatus } from "@/app/generated/prisma/enums"
-import { z } from "zod"
-
-const schema = z.object({
-  name: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
-  email: z.email("Email không hợp lệ"),
-  password: z
-    .string()
-    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
-    .regex(/[A-Z]/, "Mật khẩu phải có ít nhất 1 chữ hoa")
-    .regex(/[0-9]/, "Mật khẩu phải có ít nhất 1 số"),
-})
+import { registerSchema } from "@/schemas/auth"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const parsed = schema.safeParse(body)
+    const parsed = registerSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(

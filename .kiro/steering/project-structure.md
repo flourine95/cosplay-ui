@@ -101,6 +101,25 @@ import { prisma } from '@/lib/prisma'
 const users = await prisma.user.findMany()
 ```
 
+### Next.js Version & Breaking Conventions
+
+Project dùng **Next.js 16**. Các thay đổi breaking so với Next.js 15:
+
+- `middleware.ts` → **`proxy.ts`** (KHÔNG dùng `middleware.ts`)
+- Export `middleware` → **`proxy`**
+- `NextMiddleware` → `NextProxy`, `MiddlewareConfig` → `ProxyConfig`
+- Edge runtime **KHÔNG** được hỗ trợ trong `proxy.ts`
+
+```typescript
+// ✅ Next.js 16
+// file: proxy.ts
+export function proxy(request: NextRequest) { ... }
+
+// ❌ Next.js 15 và cũ hơn (KHÔNG dùng)
+// file: middleware.ts
+export function middleware(request: NextRequest) { ... }
+```
+
 #[[file:../../docs/CONVENTIONS.md]]
 #[[file:../../docs/PATTERNS.md]]
 #[[file:../../docs/DATABASE_GUIDE.md]]

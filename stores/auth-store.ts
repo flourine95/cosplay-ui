@@ -1,15 +1,7 @@
 "use client"
 
 import { create } from "zustand"
-
-type AuthUser = {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: string
-  avatar: string | null
-}
+import type { AuthUser } from "@/types/api"
 
 interface AuthStore {
   user: AuthUser | null

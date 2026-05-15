@@ -26,4 +26,8 @@ export type PaginatedResponse<T> = {
   }
 }
 
+/** User object trả về từ API — không có password */
 export type UserPublic = Omit<User, "password">
+
+/** Alias dùng trong auth store và client components */
+export type AuthUser = UserPublic
