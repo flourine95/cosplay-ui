@@ -1,12 +1,11 @@
 import bcrypt from "bcryptjs"
+import { cache } from "react"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import type { User } from "@/app/generated/prisma/client"
 
 const SESSION_COOKIE = "session_id"
 const SESSION_DURATION_DAYS = 30
-
-// ─── Password ────────────────────────────────────────────────────────────────
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
@@ -18,8 +17,6 @@ export async function verifyPassword(
 ): Promise<boolean> {
   return bcrypt.compare(password, hash)
 }
-
-// ─── Session ─────────────────────────────────────────────────────────────────
 
 export async function createSession(userId: number): Promise<string> {
   const expiresAt = new Date()
@@ -51,28 +48,26 @@ export async function deleteSession(): Promise<void> {
   }
 }
 
-export async function getSession(): Promise<
-  (User & { sessionId: string }) | null
-> {
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get(SESSION_COOKIE)?.value
-  if (!sessionId) return null
+export const getSession = cache(
+  async (): Promise<(User & { sessionId: string }) | null> => {
+    const cookieStore = await cookies()
+    const sessionId = cookieStore.get(SESSION_COOKIE)?.value
+    if (!sessionId) return null
 
-  const session = await prisma.session.findUnique({
-    where: { id: sessionId },
-    include: { user: true },
-  })
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { user: true },
+    })
 
-  if (!session || session.expiresAt < new Date()) {
-    if (session) await prisma.session.delete({ where: { id: sessionId } })
-    cookieStore.delete(SESSION_COOKIE)
-    return null
+    if (!session || session.expiresAt < new Date()) {
+      if (session) await prisma.session.delete({ where: { id: sessionId } })
+      cookieStore.delete(SESSION_COOKIE)
+      return null
+    }
+
+    return { ...session.user, sessionId: session.id }
   }
-
-  return { ...session.user, sessionId: session.id }
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+)
 
 export type SessionUser = NonNullable<Awaited<ReturnType<typeof getSession>>>
 

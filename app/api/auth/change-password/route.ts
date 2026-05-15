@@ -14,12 +14,15 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const sessionUser = await getSession()
+    const [sessionUser, body] = await Promise.all([
+      getSession(),
+      request.json(),
+    ])
+
     if (!sessionUser) {
       return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 })
     }
 
-    const body = await request.json()
     const parsed = schema.safeParse(body)
 
     if (!parsed.success) {

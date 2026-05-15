@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { email } })
 
-    // Dùng cùng thông báo lỗi để tránh user enumeration
     if (!user || !(await verifyPassword(password, user.password))) {
       return NextResponse.json(
         { error: "Email hoặc mật khẩu không đúng" },
@@ -47,12 +46,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    })
-
-    await createSession(user.id)
+    await Promise.all([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      }),
+      createSession(user.id),
+    ])
 
     return NextResponse.json({ user: sanitizeUser(user) })
   } catch (error) {
