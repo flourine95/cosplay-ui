@@ -1,181 +1,323 @@
-# Common Patterns & Examples
+# Patterns
 
-Các patterns và examples thường dùng trong dự án.
+Code patterns thực tế trong dự án — TypeScript, React, data fetching, state management, API routes.
 
-## 📋 Mục lục
+## Mục lục
 
-- [Component Patterns](#component-patterns)
-- [Data Fetching](#data-fetching)
-- [Form Handling](#form-handling)
-- [Error Handling](#error-handling)
-- [State Management](#state-management)
+- [TypeScript Patterns](#typescript-patterns)
+- [Zod Validation](#zod-validation)
+- [React Patterns](#react-patterns)
+- [Data Fetching (React Query)](#data-fetching-react-query)
+- [State Management (Zustand)](#state-management-zustand)
 - [API Routes](#api-routes)
+- [Authentication](#authentication)
 
 ---
 
-## Component Patterns
+## TypeScript Patterns
 
-### Basic Component
+### Dùng Prisma Generated Types
+
+Luôn import types từ Prisma cho database models — không tạo lại:
 
 ```typescript
-// components/product/product-card.tsx
-import { Card } from "@/components/ui/card"
-import { formatPrice } from "@/lib/utils"
-import type { Product } from "@/types"
+import type { User, Product, Order } from "@/app/generated/prisma/client"
+import { Prisma } from "@/app/generated/prisma/client"
+```
 
+### Prisma Type Utilities
+
+```typescript
+// Omit sensitive fields
+type UserPublic = Omit<User, "password">
+
+// Pick specific fields
+type UserBasic = Pick<User, "id" | "name" | "email">
+
+// Type với relations
+const userWithOrders = {
+  include: { orders: true },
+} satisfies Prisma.UserDefaultArgs
+type UserWithOrders = Prisma.UserGetPayload<typeof userWithOrders>
+
+// Type với select
+const userSelect = {
+  select: { id: true, email: true },
+} satisfies Prisma.UserDefaultArgs
+type UserSelected = Prisma.UserGetPayload<typeof userSelect>
+```
+
+### Custom Types
+
+Chỉ tạo custom types cho API contracts và UI-only types trong `types/`:
+
+```typescript
+// types/api.ts
+import type { User } from "@/app/generated/prisma/client"
+
+export type ApiResponse<T = unknown> = {
+  data?: T
+  error?: string
+  message?: string
+}
+
+export type PaginatedResponse<T> = {
+  data: T[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
+}
+
+export type UserPublic = Omit<User, "password">
+```
+
+### Tránh `any`
+
+```typescript
+❌ Bad
+const data: any = fetchData()
+
+✅ Good
+const data: User[] = fetchData()
+
+// Nếu thật sự không biết type
+const data: unknown = fetchData()
+if (data && typeof data === 'object' && 'id' in data) { ... }
+```
+
+### Null/Undefined Handling
+
+```typescript
+// Optional chaining
+const name = user?.profile?.name
+
+// Nullish coalescing
+const displayName = user?.name ?? "Khách"
+
+// Early return
+if (!user) return null
+```
+
+### Function Types
+
+Dùng arrow functions, có return type rõ ràng:
+
+```typescript
+✅ Good
+const getUserById = (id: number): Promise<User | null> => {
+  return prisma.user.findUnique({ where: { id } })
+}
+
+❌ Bad — thiếu return type, dùng function declaration
+function getUserById(id) {
+  return prisma.user.findUnique({ where: { id } })
+}
+```
+
+---
+
+## Zod Validation
+
+### Zod v4 — Những thay đổi quan trọng
+
+```typescript
+// ✅ Zod v4
+z.email({ error: "Email không hợp lệ" })
+z.url({ error: "URL không hợp lệ" })
+z.uuid({ error: "UUID không hợp lệ" })
+
+// ❌ Zod v3 (không dùng)
+z.string().email({ message: "Email không hợp lệ" })
+z.string().url({ message: "URL không hợp lệ" })
+```
+
+Custom errors dùng `{ error: '...' }`, **không phải** `{ message: '...' }`.
+Ngoại lệ: `.refine()` vẫn dùng `message`:
+
+```typescript
+.refine((data) => data.password === data.confirmPassword, {
+  message: 'Mật khẩu xác nhận không khớp',
+  path: ['confirmPassword'],
+})
+```
+
+### Schema Example
+
+```typescript
+// schemas/auth.ts
+import { z } from "zod"
+
+export const loginSchema = z.object({
+  email: z.email({ error: "Email không hợp lệ" }),
+  password: z.string().min(8, { error: "Mật khẩu phải có ít nhất 8 ký tự" }),
+})
+
+export const registerSchema = z.object({
+  name: z.string().min(2, { error: "Tên phải có ít nhất 2 ký tự" }),
+  email: z.email({ error: "Email không hợp lệ" }),
+  password: z
+    .string()
+    .min(8, { error: "Mật khẩu phải có ít nhất 8 ký tự" })
+    .regex(/[a-zA-Z]/, { error: "Mật khẩu phải chứa ít nhất 1 chữ cái" })
+    .regex(/[0-9]/, { error: "Mật khẩu phải chứa ít nhất 1 số" }),
+})
+
+// Infer type từ schema
+export type LoginInput = z.infer<typeof loginSchema>
+export type RegisterInput = z.infer<typeof registerSchema>
+```
+
+### Validate trong API Route
+
+```typescript
+export async function POST(request: Request) {
+  const body = await request.json()
+  const parsed = loginSchema.safeParse(body)
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ" },
+      { status: 400 }
+    )
+  }
+
+  const { email, password } = parsed.data
+  // ...
+}
+```
+
+---
+
+## React Patterns
+
+### Component Definition
+
+```typescript
+// ✅ Arrow function với typed props
 interface ProductCardProps {
   product: Product
   onAddToCart?: (product: Product) => void
 }
 
 export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
-  const handleClick = () => {
-    onAddToCart?.(product)
-  }
+  return <div>...</div>
+}
 
-  return (
-    <Card>
-      <h3>{product.name}</h3>
-      <p>{formatPrice(product.price)}</p>
-      <button onClick={handleClick}>Add to Cart</button>
-    </Card>
-  )
+// ❌ Function declaration, props không destructure
+export function ProductCard(props: ProductCardProps) {
+  return <div>{props.product.name}</div>
 }
 ```
 
-### Component with Children
+### Event Handlers
+
+Prefix với `handle`:
 
 ```typescript
-// components/common/container.tsx
-interface ContainerProps {
-  children: React.ReactNode
-  className?: string
-}
+✅ Good
+const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); ... }
+const handleClick = () => { ... }
 
-export const Container = ({ children, className }: ContainerProps) => {
-  return <div className={cn("container mx-auto px-4", className)}>{children}</div>
-}
+❌ Bad
+const onSubmit = () => {}
+const click = () => {}
+const submitForm = () => {}
 ```
 
-### Compound Component Pattern
+### Conditional Rendering
 
 ```typescript
-// components/ui/card.tsx
-interface CardProps {
-  children: React.ReactNode
-}
+✅ Good
+{isLoading && <Spinner />}
+{error && <ErrorMessage error={error} />}
+{items.length > 0 ? <ItemList items={items} /> : <EmptyState />}
 
-export const Card = ({ children }: CardProps) => {
-  return <div className="card">{children}</div>
-}
-
-Card.Header = ({ children }: CardProps) => {
-  return <div className="card-header">{children}</div>
-}
-
-Card.Body = ({ children }: CardProps) => {
-  return <div className="card-body">{children}</div>
-}
-
-Card.Footer = ({ children }: CardProps) => {
-  return <div className="card-footer">{children}</div>
-}
-
-// Usage
-<Card>
-  <Card.Header>Title</Card.Header>
-  <Card.Body>Content</Card.Body>
-  <Card.Footer>Actions</Card.Footer>
-</Card>
+❌ Bad
+{isLoading ? <Spinner /> : null}
+{error ? <ErrorMessage error={error} /> : <></>}
 ```
 
-### Render Props Pattern
+### Custom Hooks
+
+Prefix với `use`, đặt trong `hooks/` nếu dùng ở nhiều nơi:
 
 ```typescript
-interface DataFetcherProps<T> {
-  url: string
-  children: (data: T | null, isLoading: boolean, error: Error | null) => React.ReactNode
-}
-
-export const DataFetcher = <T,>({ url, children }: DataFetcherProps<T>) => {
-  const [data, setData] = useState<T | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
+// hooks/use-debounce.ts
+export const useDebounce = <T>(value: T, delay = 500): T => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
   useEffect(() => {
-    fetch(url)
-      .then((res) => res.json())
-      .then(setData)
-      .catch(setError)
-      .finally(() => setIsLoading(false))
-  }, [url])
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
 
-  return <>{children(data, isLoading, error)}</>
+  return debouncedValue
 }
-
-// Usage
-<DataFetcher<User[]> url="/api/users">
-  {(users, isLoading, error) => {
-    if (isLoading) return <Spinner />
-    if (error) return <Error error={error} />
-    return <UserList users={users} />
-  }}
-</DataFetcher>
 ```
 
 ---
 
-## Data Fetching
+## Data Fetching (React Query)
 
-### Server Component (Next.js 15+)
+Project dùng `@tanstack/react-query` cho server state. **Không dùng SWR.**
+
+### Setup (đã có sẵn)
 
 ```typescript
-// app/products/page.tsx
-import { prisma } from "@/lib/prisma"
-import { ProductList } from "@/components/product/product-list"
+// providers/query-provider.tsx
+'use client'
 
-const getProducts = async () => {
-  const products = await prisma.product.findMany({
-    where: { status: "ACTIVE" },
-    include: { images: true },
-    orderBy: { createdAt: "desc" },
-  })
-  return products
-}
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useState } from 'react'
 
-export default async function ProductsPage() {
-  const products = await getProducts()
-
-  return (
-    <div>
-      <h1>Products</h1>
-      <ProductList products={products} />
-    </div>
+export function QueryProvider({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(
+    () => new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 60 * 1000,
+          refetchOnWindowFocus: false,
+        },
+      },
+    })
   )
+
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }
 ```
 
-### Client Component with SWR
+### useQuery — Fetch data
 
 ```typescript
-// components/product/product-list.tsx
-"use client"
+'use client'
 
-import useSWR from "swr"
-import { ProductCard } from "./product-card"
+import { useQuery } from '@tanstack/react-query'
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const useProducts = (categoryId?: number) => {
+  return useQuery({
+    queryKey: ['products', categoryId],
+    queryFn: async () => {
+      const url = categoryId ? `/api/products?category=${categoryId}` : '/api/products'
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Failed to fetch products')
+      return res.json() as Promise<Product[]>
+    },
+  })
+}
 
-export const ProductList = () => {
-  const { data, error, isLoading } = useSWR<Product[]>("/api/products", fetcher)
+// Dùng trong component
+export const ProductList = ({ categoryId }: { categoryId?: number }) => {
+  const { data: products, isLoading, error } = useProducts(categoryId)
 
   if (isLoading) return <Spinner />
-  if (error) return <ErrorMessage error={error} />
-  if (!data) return null
+  if (error) return <ErrorMessage />
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      {data.map((product) => (
+      {products?.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
@@ -183,363 +325,187 @@ export const ProductList = () => {
 }
 ```
 
-### Parallel Data Fetching
+### useMutation — Create/Update/Delete
 
 ```typescript
-// app/dashboard/page.tsx
-const getStats = async () => {
-  const [users, orders, revenue] = await Promise.all([
-    prisma.user.count(),
-    prisma.order.count(),
-    prisma.order.aggregate({ _sum: { total: true } }),
-  ])
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-  return { users, orders, revenue: revenue._sum.total ?? 0 }
-}
+const useCreateProduct = () => {
+  const queryClient = useQueryClient()
 
-export default async function DashboardPage() {
-  const stats = await getStats()
-
-  return <DashboardStats stats={stats} />
-}
-```
-
-### Incremental Static Regeneration (ISR)
-
-```typescript
-// app/products/[slug]/page.tsx
-export const revalidate = 3600 // Revalidate every hour
-
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-  })
-
-  if (!product) notFound()
-
-  return <ProductDetail product={product} />
-}
-```
-
----
-
-## Form Handling
-
-### React Hook Form + Zod
-
-```typescript
-// components/auth/login-form.tsx
-"use client"
-
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-
-const loginSchema = z.object({
-  email: z.string().email("Email không hợp lệ"),
-  password: z.string().min(8, "Mật khẩu tối thiểu 8 ký tự"),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
-
-export const LoginForm = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  })
-
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      const response = await fetch("/api/auth/login", {
+  return useMutation({
+    mutationFn: async (data: CreateProductInput) => {
+      const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
+      if (!res.ok) throw new Error("Failed to create product")
+      return res.json()
+    },
+    onSuccess: () => {
+      // Invalidate để refetch danh sách
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    },
+  })
+}
 
-      if (!response.ok) throw new Error("Login failed")
+// Dùng trong component
+const { mutate: createProduct, isPending } = useCreateProduct()
 
-      // Redirect or update state
-    } catch (error) {
-      console.error("Login error:", error)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <Input {...register("email")} type="email" placeholder="Email" />
-        {errors.email && <span className="error">{errors.email.message}</span>}
-      </div>
-
-      <div>
-        <Input {...register("password")} type="password" placeholder="Password" />
-        {errors.password && <span className="error">{errors.password.message}</span>}
-      </div>
-
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
-      </Button>
-    </form>
-  )
+const handleSubmit = (data: CreateProductInput) => {
+  createProduct(data, {
+    onSuccess: () => toast.success("Tạo sản phẩm thành công"),
+    onError: (error) => toast.error(error.message),
+  })
 }
 ```
 
-### Form with Server Actions
+### Server Component — Fetch trực tiếp
+
+Trong Server Components, fetch trực tiếp qua Prisma, không cần React Query:
 
 ```typescript
-// app/products/new/page.tsx
-"use server"
+// app/products/page.tsx
+import { prisma } from '@/lib/prisma'
 
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-
-export const createProduct = async (formData: FormData) => {
-  const name = formData.get("name") as string
-  const price = parseFloat(formData.get("price") as string)
-
-  const product = await prisma.product.create({
-    data: { name, price },
+export default async function ProductsPage() {
+  const products = await prisma.product.findMany({
+    where: { status: 'ACTIVE' },
+    orderBy: { createdAt: 'desc' },
   })
 
-  revalidatePath("/products")
-  redirect(`/products/${product.slug}`)
-}
-
-// Client component
-export default function NewProductPage() {
-  return (
-    <form action={createProduct}>
-      <input name="name" required />
-      <input name="price" type="number" required />
-      <button type="submit">Create</button>
-    </form>
-  )
+  return <ProductList products={products} />
 }
 ```
 
 ---
 
-## Error Handling
+## State Management (Zustand)
 
-### Try-Catch Pattern
+### Auth Store
 
 ```typescript
-const fetchUser = async (id: number) => {
-  try {
-    const response = await fetch(`/api/users/${id}`)
+// stores/auth-store.ts
+import { create } from "zustand"
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+export const useAuth = create<AuthStore>()((set) => ({
+  user: null,
+  isLoading: true,
+
+  refresh: async () => {
+    const res = await fetch("/api/auth/me")
+    if (res.ok) {
+      const data = await res.json()
+      set({ user: data.user })
+    } else {
+      set({ user: null })
     }
+  },
 
-    const user = await response.json()
-    return user
-  } catch (error) {
-    console.error("Failed to fetch user:", error)
-    throw error // Re-throw để component xử lý
-  }
-}
+  login: async (email, password) => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+    const data = await res.json()
+    if (!res.ok) return { error: data.error }
+    set({ user: data.user })
+    return {}
+  },
+
+  logout: async () => {
+    await fetch("/api/auth/logout", { method: "POST" })
+    set({ user: null })
+  },
+}))
 ```
 
-### Error Boundary
+### Cart Store (với persist)
 
 ```typescript
-// components/error-boundary.tsx
-"use client"
-
-import { Component, type ReactNode } from "react"
-
-interface Props {
-  children: ReactNode
-  fallback?: ReactNode
-}
-
-interface State {
-  hasError: boolean
-  error?: Error
-}
-
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback ?? <div>Something went wrong</div>
-    }
-
-    return this.props.children
-  }
-}
-
-// Usage
-<ErrorBoundary fallback={<ErrorPage />}>
-  <ProductList />
-</ErrorBoundary>
-```
-
-### API Error Response
-
-```typescript
-// app/api/products/route.ts
-import { NextResponse } from "next/server"
-
-export async function GET() {
-  try {
-    const products = await prisma.product.findMany()
-    return NextResponse.json(products)
-  } catch (error) {
-    console.error("Failed to fetch products:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
-  }
-}
-```
-
----
-
-## State Management
-
-### Zustand Store
-
-```typescript
-// lib/store/cart-store.ts
+// stores/cart-store.ts
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-interface CartItem {
-  id: number
-  name: string
-  price: number
-  quantity: number
-}
-
-interface CartStore {
-  items: CartItem[]
-  addItem: (item: CartItem) => void
-  removeItem: (id: number) => void
-  clearCart: () => void
-  total: () => number
-}
-
-export const useCartStore = create<CartStore>()(
+export const useCart = create<CartStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       items: [],
-
-      addItem: (item) =>
+      addItem: (newItem) =>
         set((state) => {
-          const existing = state.items.find((i) => i.id === item.id)
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-              ),
-            }
-          }
-          return { items: [...state.items, { ...item, quantity: 1 }] }
+          const existing = state.items.find(
+            (item) =>
+              item.productSlug === newItem.productSlug &&
+              item.size === newItem.size
+          )
+          const items = existing
+            ? state.items.map((item) =>
+                item === existing
+                  ? { ...item, quantity: item.quantity + newItem.quantity }
+                  : item
+              )
+            : [...state.items, newItem]
+          return { items }
         }),
-
-      removeItem: (id) =>
-        set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
-        })),
-
       clearCart: () => set({ items: [] }),
-
-      total: () => {
-        const { items } = get()
-        return items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      },
     }),
-    {
-      name: "cart-storage",
-    }
+    { name: "cart" } // localStorage key
   )
 )
-
-// Usage in component
-const { items, addItem, total } = useCartStore()
 ```
 
-### Context Pattern
+### Dùng store trong component
 
 ```typescript
-// lib/context/auth-context.tsx
-"use client"
+// Client component
+'use client'
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { useAuth } from '@/stores/auth-store'
+import { useCart } from '@/stores/cart-store'
 
-interface User {
-  id: number
-  name: string
-  email: string
+export const Header = () => {
+  const { user, logout } = useAuth()
+  const { items } = useCart()
+
+  return (
+    <header>
+      <span>{items.length} items</span>
+      {user ? (
+        <button onClick={logout}>{user.name}</button>
+      ) : (
+        <a href="/login">Đăng nhập</a>
+      )}
+    </header>
+  )
 }
-
-interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
-
-  const login = async (email: string, password: string) => {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    })
-    const data = await response.json()
-    setUser(data.user)
-  }
-
-  const logout = () => {
-    setUser(null)
-  }
-
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider")
-  }
-  return context
-}
-
-// Usage
-<AuthProvider>
-  <App />
-</AuthProvider>
 ```
 
 ---
 
 ## API Routes
 
-### GET Request
+### Response Format
+
+Dùng nhất quán `NextResponse.json()`:
+
+```typescript
+import { NextResponse } from "next/server"
+
+// Success
+return NextResponse.json({ data: result })
+return NextResponse.json({ data: result }, { status: 201 })
+
+// Error
+return NextResponse.json({ error: "Không tìm thấy" }, { status: 404 })
+return NextResponse.json({ error: "Lỗi server" }, { status: 500 })
+
+// Success với message
+return NextResponse.json({ success: true, message: "Thành công" })
+```
+
+### GET Route
 
 ```typescript
 // app/api/products/route.ts
@@ -547,49 +513,54 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const category = searchParams.get("category")
+  try {
+    const { searchParams } = request.nextUrl
+    const categoryId = searchParams.get("category")
 
-  const products = await prisma.product.findMany({
-    where: category ? { categoryId: parseInt(category) } : undefined,
-    include: { images: true },
-  })
+    const products = await prisma.product.findMany({
+      where: categoryId ? { categoryId: Number(categoryId) } : undefined,
+      orderBy: { createdAt: "desc" },
+    })
 
-  return NextResponse.json(products)
+    return NextResponse.json({ data: products })
+  } catch (error) {
+    console.error("Failed to fetch products:", error)
+    return NextResponse.json({ error: "Lỗi server" }, { status: 500 })
+  }
 }
 ```
 
-### POST Request
+### POST Route với Zod
 
 ```typescript
 // app/api/products/route.ts
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
+import { productSchema } from "@/schemas/product"
 
-    // Validate
-    if (!body.name || !body.price) {
+export async function POST(request: Request) {
+  try {
+    const user = await getSession()
+    if (!user) {
+      return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const parsed = productSchema.safeParse(body)
+
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ" },
         { status: 400 }
       )
     }
 
     const product = await prisma.product.create({
-      data: {
-        name: body.name,
-        price: body.price,
-        description: body.description,
-      },
+      data: { ...parsed.data, sellerId: user.id },
     })
 
-    return NextResponse.json(product, { status: 201 })
+    return NextResponse.json({ data: product }, { status: 201 })
   } catch (error) {
     console.error("Failed to create product:", error)
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Lỗi server" }, { status: 500 })
   }
 }
 ```
@@ -598,237 +569,106 @@ export async function POST(request: NextRequest) {
 
 ```typescript
 // app/api/products/[id]/route.ts
-interface RouteParams {
-  params: { id: string }
+interface RouteContext {
+  params: Promise<{ id: string }>
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: Request, { params }: RouteContext) {
+  const { id } = await params
+
   const product = await prisma.product.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: Number(id) },
   })
 
   if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 })
+    return NextResponse.json(
+      { error: "Không tìm thấy sản phẩm" },
+      { status: 404 }
+    )
   }
 
-  return NextResponse.json(product)
-}
-
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  const body = await request.json()
-
-  const product = await prisma.product.update({
-    where: { id: parseInt(params.id) },
-    data: body,
-  })
-
-  return NextResponse.json(product)
-}
-
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  await prisma.product.delete({
-    where: { id: parseInt(params.id) },
-  })
-
-  return NextResponse.json({ success: true })
-}
-```
-
-### Middleware
-
-```typescript
-// middleware.ts
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-
-export const middleware = (request: NextRequest) => {
-  const token = request.cookies.get("token")
-
-  if (!token && request.nextUrl.pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/login", request.url))
-  }
-
-  return NextResponse.next()
-}
-
-export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  return NextResponse.json({ data: product })
 }
 ```
 
 ---
 
-## Custom Hooks
+## Authentication
 
-### useDebounce
+### Server-side — Lấy session
 
 ```typescript
-// hooks/use-debounce.ts
-import { useEffect, useState } from "react"
+import { getSession } from "@/lib/auth"
 
-export const useDebounce = <T>(value: T, delay: number = 500): T => {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
-
-// Usage
-const [searchTerm, setSearchTerm] = useState("")
-const debouncedSearch = useDebounce(searchTerm, 500)
-
-useEffect(() => {
-  if (debouncedSearch) {
-    fetchResults(debouncedSearch)
+export async function GET() {
+  const user = await getSession()
+  if (!user) {
+    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 })
   }
-}, [debouncedSearch])
+
+  // user.id, user.role, user.email...
+}
 ```
 
-### useLocalStorage
+### Client-side — Dùng auth store
 
 ```typescript
-// hooks/use-local-storage.ts
-import { useState, useEffect } from "react"
+'use client'
 
-export const useLocalStorage = <T>(key: string, initialValue: T) => {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === "undefined") return initialValue
+import { useAuth } from '@/stores/auth-store'
 
-    try {
-      const item = window.localStorage.getItem(key)
-      return item ? JSON.parse(item) : initialValue
-    } catch (error) {
-      console.error(error)
-      return initialValue
-    }
+export const ProfilePage = () => {
+  const { user, isLoading } = useAuth()
+
+  if (isLoading) return <Spinner />
+  if (!user) return <redirect to="/login" />
+
+  return <div>Xin chào, {user.name}</div>
+}
+```
+
+### Form với React Hook Form + Zod
+
+```typescript
+'use client'
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, type LoginInput } from '@/schemas/auth'
+import { useAuth } from '@/stores/auth-store'
+
+export const LoginForm = () => {
+  const { login } = useAuth()
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
   })
 
-  const setValue = (value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value
-      setStoredValue(valueToStore)
-
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore))
-      }
-    } catch (error) {
-      console.error(error)
+  const onSubmit = async (data: LoginInput) => {
+    const result = await login(data.email, data.password)
+    if (result.error) {
+      setError('root', { message: result.error })
     }
   }
 
-  return [storedValue, setValue] as const
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register('email')} type="email" placeholder="Email" />
+      {errors.email && <span>{errors.email.message}</span>}
+
+      <input {...register('password')} type="password" placeholder="Mật khẩu" />
+      {errors.password && <span>{errors.password.message}</span>}
+
+      {errors.root && <span>{errors.root.message}</span>}
+
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+      </button>
+    </form>
+  )
 }
-
-// Usage
-const [theme, setTheme] = useLocalStorage("theme", "light")
 ```
-
-### useMediaQuery
-
-```typescript
-// hooks/use-media-query.ts
-import { useState, useEffect } from "react"
-
-export const useMediaQuery = (query: string): boolean => {
-  const [matches, setMatches] = useState(false)
-
-  useEffect(() => {
-    const media = window.matchMedia(query)
-    if (media.matches !== matches) {
-      setMatches(media.matches)
-    }
-
-    const listener = () => setMatches(media.matches)
-    media.addEventListener("change", listener)
-
-    return () => media.removeEventListener("change", listener)
-  }, [matches, query])
-
-  return matches
-}
-
-// Usage
-const isMobile = useMediaQuery("(max-width: 768px)")
-```
-
----
-
-## Testing Patterns
-
-### Component Test
-
-```typescript
-// __tests__/product-card.test.tsx
-import { render, screen, fireEvent } from "@testing-library/react"
-import { ProductCard } from "@/components/product/product-card"
-
-describe("ProductCard", () => {
-  const mockProduct = {
-    id: 1,
-    name: "Test Product",
-    price: 100000,
-    image: "/test.jpg",
-  }
-
-  it("renders product information", () => {
-    render(<ProductCard product={mockProduct} />)
-
-    expect(screen.getByText("Test Product")).toBeInTheDocument()
-    expect(screen.getByText("100.000 ₫")).toBeInTheDocument()
-  })
-
-  it("calls onAddToCart when button clicked", () => {
-    const handleAddToCart = jest.fn()
-    render(<ProductCard product={mockProduct} onAddToCart={handleAddToCart} />)
-
-    fireEvent.click(screen.getByText("Add to Cart"))
-    expect(handleAddToCart).toHaveBeenCalledWith(mockProduct)
-  })
-})
-```
-
-### API Test
-
-```typescript
-// __tests__/api/products.test.ts
-import { GET, POST } from "@/app/api/products/route"
-import { prisma } from "@/lib/prisma"
-
-jest.mock("@/lib/prisma", () => ({
-  prisma: {
-    product: {
-      findMany: jest.fn(),
-      create: jest.fn(),
-    },
-  },
-}))
-
-describe("/api/products", () => {
-  it("GET returns products", async () => {
-    const mockProducts = [{ id: 1, name: "Product 1" }]
-    ;(prisma.product.findMany as jest.Mock).mockResolvedValue(mockProducts)
-
-    const response = await GET(new Request("http://localhost/api/products"))
-    const data = await response.json()
-
-    expect(data).toEqual(mockProducts)
-  })
-})
-```
-
----
-
-Tham khảo thêm:
-
-- [CONVENTIONS.md](./CONVENTIONS.md) - Quy ước code tổng quát
-- [CODE_STANDARDS.md](./CODE_STANDARDS.md) - Chuẩn code hiện đại

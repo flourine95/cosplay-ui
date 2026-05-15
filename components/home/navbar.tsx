@@ -23,8 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useCart } from "@/lib/cart-context"
-import { useAuth } from "@/lib/auth-context"
+import { useCart } from "@/stores/cart-store"
+import { useAuth } from "@/stores/auth-store"
 
 const navLinks = [
   { label: "Mua ngay", href: "/products" },

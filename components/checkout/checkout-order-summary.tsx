@@ -1,6 +1,6 @@
 "use client"
 
-import { useCart } from "@/lib/cart-context"
+import { useCart } from "@/stores/cart-store"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
