@@ -1,4 +1,8 @@
+"use client"
+
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { ArrowRight, Mail, Lock, User } from "lucide-react"
 
 import { AuthShell } from "@/components/auth/auth-shell"
@@ -6,8 +10,47 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/lib/auth-context"
 
 export default function RegisterPage() {
+  const { register } = useAuth()
+  const router = useRouter()
+
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [agreed, setAgreed] = useState(false)
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+
+    if (password !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp")
+      return
+    }
+
+    if (!agreed) {
+      setError("Vui lòng đồng ý với điều khoản sử dụng")
+      return
+    }
+
+    setIsLoading(true)
+    const result = await register(name, email, password)
+
+    if (result.error) {
+      setError(result.error)
+      setIsLoading(false)
+      return
+    }
+
+    router.push("/")
+    router.refresh()
+  }
+
   return (
     <AuthShell
       title="Đăng ký"
@@ -21,33 +64,28 @@ export default function RegisterPage() {
         { value: "100%", label: "đồng bộ" },
       ]}
     >
-      <form className="space-y-5">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="first-name" className="text-sm text-foreground">
-              Họ
-            </Label>
-            <div className="relative">
-              <User className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="first-name"
-                placeholder="Nguyễn"
-                className="h-11 rounded-xl pl-10"
-              />
-            </div>
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        {error && (
+          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {error}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="last-name" className="text-sm text-foreground">
-              Tên
-            </Label>
-            <div className="relative">
-              <User className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="last-name"
-                placeholder="An"
-                className="h-11 rounded-xl pl-10"
-              />
-            </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-sm text-foreground">
+            Họ và tên
+          </Label>
+          <div className="relative">
+            <User className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="name"
+              placeholder="Nguyễn Văn A"
+              className="h-11 rounded-xl pl-10"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="name"
+            />
           </div>
         </div>
 
@@ -62,6 +100,10 @@ export default function RegisterPage() {
               type="email"
               placeholder="ban@cosplay.vn"
               className="h-11 rounded-xl pl-10"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
             />
           </div>
         </div>
@@ -78,8 +120,12 @@ export default function RegisterPage() {
             <Input
               id="register-password"
               type="password"
-              placeholder="Tạo mật khẩu"
+              placeholder="Tạo mật khẩu (ít nhất 8 ký tự, 1 chữ hoa, 1 số)"
               className="h-11 rounded-xl pl-10"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
             />
           </div>
         </div>
@@ -95,33 +141,44 @@ export default function RegisterPage() {
               type="password"
               placeholder="Nhập lại mật khẩu"
               className="h-11 rounded-xl pl-10"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              autoComplete="new-password"
             />
           </div>
         </div>
 
         <label className="flex items-start gap-2 text-sm text-muted-foreground">
-          <Checkbox id="terms" className="mt-0.5" />
+          <Checkbox
+            id="terms"
+            className="mt-0.5"
+            checked={agreed}
+            onCheckedChange={(v) => setAgreed(!!v)}
+          />
           <span>
             Tôi đồng ý với{" "}
-            <Link href="/" className="font-medium text-brand">
+            <Link href="/" className="font-medium text-primary">
               điều khoản
             </Link>{" "}
             và chính sách bảo mật của shop.
           </span>
         </label>
 
-        <Button className="h-11 w-full rounded-full text-base" asChild>
-          <Link href="/">
-            Tạo tài khoản
-            <ArrowRight data-icon="inline-end" />
-          </Link>
+        <Button
+          className="h-11 w-full rounded-full text-base"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+          {!isLoading && <ArrowRight data-icon="inline-end" />}
         </Button>
 
         <p className="pt-2 text-center text-sm text-muted-foreground">
           Đã có tài khoản?{" "}
           <Link
             href="/login"
-            className="font-medium text-brand hover:text-brand/80"
+            className="font-medium text-primary hover:text-primary/80"
           >
             Đăng nhập
           </Link>

@@ -1,5 +1,6 @@
 import { hashPassword } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { PrismaClient } from "@/app/generated/prisma/client"
+import { PrismaPg } from "@prisma/adapter-pg"
 import {
   ProductStatus,
   ProductType,
@@ -9,6 +10,9 @@ import {
   UserStatus,
 } from "@/app/generated/prisma/enums"
 import "dotenv/config"
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
+const prisma = new PrismaClient({ adapter })
 
 const systemSettings = [
   {
@@ -328,13 +332,19 @@ const seedUsers = async () => {
   const admin = await prisma.user.upsert({
     where: { email: users.admin.email },
     update: {},
-    create: { ...users.admin, password: hashPassword(users.admin.password) },
+    create: {
+      ...users.admin,
+      password: await hashPassword(users.admin.password),
+    },
   })
 
   const seller = await prisma.user.upsert({
     where: { email: users.seller.email },
     update: {},
-    create: { ...users.seller, password: hashPassword(users.seller.password) },
+    create: {
+      ...users.seller,
+      password: await hashPassword(users.seller.password),
+    },
   })
 
   const customer = await prisma.user.upsert({
@@ -342,7 +352,7 @@ const seedUsers = async () => {
     update: {},
     create: {
       ...users.customer,
-      password: hashPassword(users.customer.password),
+      password: await hashPassword(users.customer.password),
     },
   })
 

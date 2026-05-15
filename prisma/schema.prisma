@@ -70,6 +70,7 @@ model User {
   rentalOrders   RentalOrder[]
   notifications  Notification[]
   passwordResets PasswordReset[]
+  sessions       Session[]
 
   ordersAsBuyer  Order[] @relation("CustomerOrders")
   ordersAsSeller Order[] @relation("SellerOrders")
@@ -104,6 +105,17 @@ model PasswordReset {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
