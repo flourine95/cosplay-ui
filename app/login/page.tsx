@@ -3,7 +3,9 @@
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react"
+import { useForm } from "react-hook-form"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -16,6 +18,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
+import { loginSchema, type LoginInput } from "@/schemas/auth"
 import { useAuth } from "@/stores/auth-store"
 
 export default function LoginPage() {
@@ -59,22 +62,25 @@ export default function LoginPage() {
             imageLabel: "Chào mừng trở lại",
           }
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-
-    const result = await login(email, password)
+  const handleLogin = async (data: LoginInput) => {
+    const result = await login(data)
 
     if (result.error) {
-      setError(result.error)
-      setIsLoading(false)
+      setError("root", { message: result.error })
       return
     }
 
@@ -109,12 +115,12 @@ export default function LoginPage() {
         },
       ]}
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        {error && (
+      <form className="space-y-5" onSubmit={handleSubmit(handleLogin)}>
+        {errors.root?.message && (
           <Alert id="login-error" variant="destructive" className="rounded-xl">
             <AlertCircle />
             <AlertDescription>
-              {error}{" "}
+              {errors.root.message}{" "}
               <Link
                 href="/forgot-password"
                 className="font-medium underline underline-offset-2"
@@ -137,14 +143,19 @@ export default function LoginPage() {
               id="login-email"
               type="email"
               placeholder="ban@cosplay.vn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-describedby={error ? "login-error" : undefined}
+              aria-invalid={!!errors.email}
+              aria-describedby={
+                errors.email || errors.root ? "login-error" : undefined
+              }
               required
               autoFocus
               autoComplete="email"
+              {...register("email")}
             />
           </InputGroup>
+          {errors.email?.message && (
+            <p className="text-xs text-destructive">{errors.email.message}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -159,11 +170,13 @@ export default function LoginPage() {
               id="login-password"
               type={showPassword ? "text" : "password"}
               placeholder="Nhập mật khẩu"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-describedby={error ? "login-error" : undefined}
+              aria-invalid={!!errors.password}
+              aria-describedby={
+                errors.password || errors.root ? "login-error" : undefined
+              }
               required
               autoComplete="current-password"
+              {...register("password")}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupButton
@@ -174,6 +187,11 @@ export default function LoginPage() {
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
+          {errors.password?.message && (
+            <p className="text-xs text-destructive">
+              {errors.password.message}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
@@ -190,7 +208,7 @@ export default function LoginPage() {
               </span>
             </span>
           </label>
-          {!error && (
+          {!errors.root?.message && (
             <Link
               href="/forgot-password"
               className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
@@ -203,10 +221,10 @@ export default function LoginPage() {
         <Button
           className="mt-1 h-11 w-full rounded-full text-base"
           type="submit"
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
-          {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
-          {!isLoading && <ArrowRight data-icon="inline-end" />}
+          {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
+          {!isSubmitting && <ArrowRight data-icon="inline-end" />}
         </Button>
 
         <p className="pt-1 text-center text-sm text-muted-foreground">

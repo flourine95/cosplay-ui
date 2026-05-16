@@ -18,8 +18,8 @@ export const registerSchema = z
     role: z.enum(["CUSTOMER", "SELLER"], {
       error: "Vui lòng chọn loại tài khoản",
     }),
-    agreed: z.literal(true, {
-      error: "Vui lòng đồng ý với điều khoản sử dụng",
+    agreed: z.boolean().refine((value) => value, {
+      message: "Vui lòng đồng ý với điều khoản sử dụng",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

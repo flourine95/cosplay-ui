@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   AlertCircle,
   ArrowRight,
@@ -12,6 +13,7 @@ import {
   EyeOff,
   Lock,
 } from "lucide-react"
+import { useForm, useWatch } from "react-hook-form"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -23,7 +25,11 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
+import type { ChangePasswordInput, ResetPasswordInput } from "@/schemas/auth"
+import { changePasswordSchema, resetPasswordSchema } from "@/schemas/auth"
 import { useAuth } from "@/stores/auth-store"
+
+type PasswordFormInput = ResetPasswordInput | ChangePasswordInput
 
 export default function ChangePasswordPage() {
   const { user } = useAuth()
@@ -31,11 +37,6 @@ export default function ChangePasswordPage() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token") // từ forgot-password flow
 
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -43,6 +44,31 @@ export default function ChangePasswordPage() {
   // Nếu có token → reset password flow, không cần đăng nhập
   // Nếu không có token → đổi mật khẩu khi đã đăng nhập
   const isResetFlow = !!token
+  const passwordFieldName = isResetFlow ? "password" : "newPassword"
+  const {
+    register,
+    handleSubmit,
+    setError,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<PasswordFormInput>({
+    resolver: zodResolver(
+      isResetFlow ? resetPasswordSchema : changePasswordSchema
+    ),
+    defaultValues: isResetFlow
+      ? { token: token ?? "", password: "", confirmPassword: "" }
+      : { currentPassword: "", newPassword: "", confirmPassword: "" },
+  })
+  const newPassword =
+    (useWatch({
+      control,
+      name: passwordFieldName as keyof PasswordFormInput,
+    }) as string) ?? ""
+  const confirmPassword =
+    (useWatch({
+      control,
+      name: "confirmPassword" as keyof PasswordFormInput,
+    }) as string) ?? ""
   const passwordChecks = [
     { label: "Ít nhất 8 ký tự", valid: newPassword.length >= 8 },
     {
@@ -59,24 +85,10 @@ export default function ChangePasswordPage() {
     },
   ]
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-
-    if (newPassword !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp")
-      return
-    }
-
-    setIsLoading(true)
-
+  const handlePasswordSubmit = async (body: PasswordFormInput) => {
     const endpoint = isResetFlow
       ? "/api/auth/reset-password"
       : "/api/auth/change-password"
-
-    const body = isResetFlow
-      ? { token, password: newPassword, confirmPassword }
-      : { currentPassword, newPassword, confirmPassword }
 
     const res = await fetch(endpoint, {
       method: "POST",
@@ -85,10 +97,9 @@ export default function ChangePasswordPage() {
     })
 
     const data = await res.json()
-    setIsLoading(false)
 
     if (!res.ok) {
-      setError(data.error)
+      setError("root", { message: data.error })
       return
     }
 
@@ -127,11 +138,11 @@ export default function ChangePasswordPage() {
         },
       ]}
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        {error && (
+      <form className="space-y-5" onSubmit={handleSubmit(handlePasswordSubmit)}>
+        {errors.root?.message && (
           <Alert variant="destructive" className="rounded-xl">
             <AlertCircle />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errors.root.message}</AlertDescription>
           </Alert>
         )}
 
@@ -151,11 +162,11 @@ export default function ChangePasswordPage() {
                 id="current-password"
                 type={showCurrentPassword ? "text" : "password"}
                 placeholder="Nhập mật khẩu hiện tại"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                aria-invalid={"currentPassword" in errors}
                 required
                 autoFocus
                 autoComplete="current-password"
+                {...register("currentPassword" as keyof PasswordFormInput)}
               />
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
@@ -168,6 +179,11 @@ export default function ChangePasswordPage() {
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
+            {"currentPassword" in errors && errors.currentPassword?.message && (
+              <p className="text-xs text-destructive">
+                {errors.currentPassword.message}
+              </p>
+            )}
           </div>
         )}
 
@@ -183,11 +199,11 @@ export default function ChangePasswordPage() {
               id="new-password"
               type={showNewPassword ? "text" : "password"}
               placeholder="Tạo mật khẩu mới"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              aria-invalid={passwordFieldName in errors}
               required
               autoFocus={isResetFlow}
               autoComplete="new-password"
+              {...register(passwordFieldName as keyof PasswordFormInput)}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupButton
@@ -198,6 +214,15 @@ export default function ChangePasswordPage() {
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
+          {passwordFieldName in errors &&
+            errors[passwordFieldName as keyof PasswordFormInput]?.message && (
+              <p className="text-xs text-destructive">
+                {
+                  errors[passwordFieldName as keyof PasswordFormInput]
+                    ?.message as string
+                }
+              </p>
+            )}
           {newPassword.length > 0 && (
             <ul className="grid gap-1.5 pt-1" aria-label="Yêu cầu mật khẩu">
               {passwordChecks.map((item) => (
@@ -245,10 +270,10 @@ export default function ChangePasswordPage() {
               id="confirm-new-password"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Nhập lại mật khẩu mới"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              aria-invalid={"confirmPassword" in errors}
               required
               autoComplete="new-password"
+              {...register("confirmPassword" as keyof PasswordFormInput)}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupButton
@@ -261,15 +286,20 @@ export default function ChangePasswordPage() {
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
+          {"confirmPassword" in errors && errors.confirmPassword?.message && (
+            <p className="text-xs text-destructive">
+              {errors.confirmPassword.message}
+            </p>
+          )}
         </div>
 
         <Button
           className="mt-1 h-11 w-full rounded-full text-base"
           type="submit"
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
-          {isLoading ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
-          {!isLoading && <ArrowRight data-icon="inline-end" />}
+          {isSubmitting ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
+          {!isSubmitting && <ArrowRight data-icon="inline-end" />}
         </Button>
 
         <p className="pt-1 text-center text-sm text-muted-foreground">

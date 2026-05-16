@@ -2,7 +2,9 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { AlertCircle, ArrowRight, CheckCircle2, Mail } from "lucide-react"
+import { useForm } from "react-hook-form"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -13,32 +15,38 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/schemas/auth"
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const [sentEmail, setSentEmail] = useState("")
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-
+  const handleForgotPassword = async (input: ForgotPasswordInput) => {
     const res = await fetch("/api/auth/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify(input),
     })
 
     const data = await res.json()
-    setIsLoading(false)
 
     if (!res.ok) {
-      setError(data.error)
+      setError("root", { message: data.error })
       return
     }
 
+    setSentEmail(input.email)
     setSent(true)
   }
 
@@ -76,8 +84,8 @@ export default function ForgotPasswordPage() {
             <div>
               <p className="font-semibold text-foreground">Đã gửi email!</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Kiểm tra hộp thư <strong>{email}</strong> để lấy link đặt lại
-                mật khẩu. Link có hiệu lực trong 1 giờ.
+                Kiểm tra hộp thư <strong>{sentEmail}</strong> để lấy link đặt
+                lại mật khẩu. Link có hiệu lực trong 1 giờ.
               </p>
             </div>
           </div>
@@ -86,11 +94,14 @@ export default function ForgotPasswordPage() {
           </Button>
         </div>
       ) : (
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {error && (
+        <form
+          className="space-y-5"
+          onSubmit={handleSubmit(handleForgotPassword)}
+        >
+          {errors.root?.message && (
             <Alert variant="destructive" className="rounded-xl">
               <AlertCircle />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{errors.root.message}</AlertDescription>
             </Alert>
           )}
 
@@ -106,13 +117,16 @@ export default function ForgotPasswordPage() {
                 id="forgot-email"
                 type="email"
                 placeholder="ban@cosplay.vn"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={!!errors.email}
                 required
                 autoFocus
                 autoComplete="email"
+                {...register("email")}
               />
             </InputGroup>
+            {errors.email?.message && (
+              <p className="text-xs text-destructive">{errors.email.message}</p>
+            )}
             <p className="text-xs text-muted-foreground">
               Không thấy thư? Kiểm tra mục spam hoặc thử lại sau vài phút.
             </p>
@@ -121,10 +135,10 @@ export default function ForgotPasswordPage() {
           <Button
             className="h-11 w-full rounded-full text-base"
             type="submit"
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
-            {isLoading ? "Đang gửi..." : "Gửi liên kết đặt lại"}
-            {!isLoading && <ArrowRight data-icon="inline-end" />}
+            {isSubmitting ? "Đang gửi..." : "Gửi liên kết đặt lại"}
+            {!isSubmitting && <ArrowRight data-icon="inline-end" />}
           </Button>
 
           <div className="flex items-center justify-between gap-3 pt-1 text-sm">

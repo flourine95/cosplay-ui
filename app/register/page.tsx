@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   AlertCircle,
   ArrowRight,
@@ -16,6 +17,7 @@ import {
   Store,
   User,
 } from "lucide-react"
+import { useForm, useWatch } from "react-hook-form"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -29,24 +31,37 @@ import {
 } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { registerSchema, type RegisterInput } from "@/schemas/auth"
 import { useAuth } from "@/stores/auth-store"
 
 export default function RegisterPage() {
   const { register } = useAuth()
   const router = useRouter()
 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [accountType, setAccountType] = useState<"CUSTOMER" | "SELLER">(
-    "CUSTOMER"
-  )
-  const [agreed, setAgreed] = useState(false)
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const {
+    register: registerField,
+    handleSubmit,
+    setError,
+    setValue,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "CUSTOMER",
+      agreed: false,
+    },
+  })
+  const password = useWatch({ control, name: "password" }) ?? ""
+  const confirmPassword = useWatch({ control, name: "confirmPassword" }) ?? ""
+  const accountType = useWatch({ control, name: "role" })
+  const agreed = useWatch({ control, name: "agreed" })
 
   const passwordChecks = [
     { label: "Ít nhất 8 ký tự", valid: password.length >= 8 },
@@ -64,33 +79,11 @@ export default function RegisterPage() {
     },
   ]
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-
-    if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp")
-      return
-    }
-
-    if (!agreed) {
-      setError("Vui lòng đồng ý với điều khoản sử dụng")
-      return
-    }
-
-    setIsLoading(true)
-    const result = await register(
-      name,
-      email,
-      password,
-      confirmPassword,
-      agreed,
-      accountType
-    )
+  const handleRegister = async (input: RegisterInput) => {
+    const result = await register(input)
 
     if (result.error) {
-      setError(result.error)
-      setIsLoading(false)
+      setError("root", { message: result.error })
       return
     }
 
@@ -158,15 +151,15 @@ export default function RegisterPage() {
             ]
       }
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        {error && (
+      <form className="space-y-5" onSubmit={handleSubmit(handleRegister)}>
+        {errors.root?.message && (
           <Alert
             id="register-error"
             variant="destructive"
             className="rounded-xl"
           >
             <AlertCircle />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errors.root.message}</AlertDescription>
           </Alert>
         )}
 
@@ -199,7 +192,9 @@ export default function RegisterPage() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setAccountType(option.value)}
+                  onClick={() =>
+                    setValue("role", option.value, { shouldValidate: true })
+                  }
                   className={cn(
                     "flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
                     isSelected
@@ -231,6 +226,11 @@ export default function RegisterPage() {
               )
             })}
           </div>
+          {errors.role?.message && (
+            <p className="mt-1 text-xs text-destructive">
+              {errors.role.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -244,13 +244,16 @@ export default function RegisterPage() {
             <InputGroupInput
               id="name"
               placeholder="Nguyễn Văn A"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              aria-invalid={!!errors.name}
               required
               autoFocus
               autoComplete="name"
+              {...registerField("name")}
             />
           </InputGroup>
+          {errors.name?.message && (
+            <p className="text-xs text-destructive">{errors.name.message}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -265,12 +268,15 @@ export default function RegisterPage() {
               id="register-email"
               type="email"
               placeholder="ban@cosplay.vn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={!!errors.email}
               required
               autoComplete="email"
+              {...registerField("email")}
             />
           </InputGroup>
+          {errors.email?.message && (
+            <p className="text-xs text-destructive">{errors.email.message}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -288,10 +294,10 @@ export default function RegisterPage() {
               id="register-password"
               type={showPassword ? "text" : "password"}
               placeholder="Tạo mật khẩu"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              aria-invalid={!!errors.password}
               required
               autoComplete="new-password"
+              {...registerField("password")}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupButton
@@ -302,6 +308,11 @@ export default function RegisterPage() {
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
+          {errors.password?.message && (
+            <p className="text-xs text-destructive">
+              {errors.password.message}
+            </p>
+          )}
           {password.length > 0 && (
             <ul className="grid gap-1.5 pt-1" aria-label="Yêu cầu mật khẩu">
               {passwordChecks.map((item) => (
@@ -346,10 +357,10 @@ export default function RegisterPage() {
               id="confirm-password"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Nhập lại mật khẩu"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              aria-invalid={!!errors.confirmPassword}
               required
               autoComplete="new-password"
+              {...registerField("confirmPassword")}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupButton
@@ -362,6 +373,11 @@ export default function RegisterPage() {
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
+          {errors.confirmPassword?.message && (
+            <p className="text-xs text-destructive">
+              {errors.confirmPassword.message}
+            </p>
+          )}
         </div>
 
         <label
@@ -372,7 +388,9 @@ export default function RegisterPage() {
             id="terms"
             className="mt-0.5"
             checked={agreed}
-            onCheckedChange={(v) => setAgreed(!!v)}
+            onCheckedChange={(value) =>
+              setValue("agreed", value === true, { shouldValidate: true })
+            }
           />
           <span>
             Tôi đồng ý với{" "}
@@ -385,14 +403,17 @@ export default function RegisterPage() {
             và chính sách bảo mật.
           </span>
         </label>
+        {errors.agreed?.message && (
+          <p className="text-xs text-destructive">{errors.agreed.message}</p>
+        )}
 
         <Button
           className="mt-1 h-11 w-full rounded-full text-base"
           type="submit"
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
-          {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
-          {!isLoading && <ArrowRight data-icon="inline-end" />}
+          {isSubmitting ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+          {!isSubmitting && <ArrowRight data-icon="inline-end" />}
         </Button>
 
         <p className="pt-1 text-center text-sm text-muted-foreground">
