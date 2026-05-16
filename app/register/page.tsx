@@ -104,52 +104,6 @@ export default function RegisterPage() {
       imageSrc="/auth-bg.jpg"
       imageAlt="Không gian chuẩn bị trang phục cosplay"
       imageLabel="Tạo tài khoản mới"
-      imageTitle={
-        isSeller
-          ? "Bán, cho thuê và nhận may trong một nơi."
-          : "Bắt đầu lưu ý tưởng, lịch thuê và đơn đặt may."
-      }
-      variant={isSeller ? "seller" : "customer"}
-      trustItems={
-        isSeller
-          ? [
-              {
-                label: "Quản lý lịch thuê",
-                description: "Tránh trùng lịch nhận và trả trang phục.",
-              },
-              {
-                label: "Nhận yêu cầu may",
-                description: "Chuẩn hóa brief, số đo, báo giá và tiến độ.",
-              },
-              {
-                label: "Theo dõi payout",
-                description: "Doanh thu, phí nền tảng và chuyển khoản rõ ràng.",
-              },
-              {
-                label: "Chờ duyệt",
-                description: "Gian hàng sẽ ở trạng thái chờ duyệt ban đầu.",
-              },
-            ]
-          : [
-              {
-                label: "Lưu hồ sơ",
-                description: "Địa chỉ và số đo sẵn sàng cho lần đặt tiếp theo.",
-              },
-              {
-                label: "Theo dõi tiến độ",
-                description:
-                  "Đơn mua, thuê và đặt may nằm trong cùng tài khoản.",
-              },
-              {
-                label: "Minh bạch cọc",
-                description: "Dễ kiểm tra tiền cọc, phí phát sinh và hoàn cọc.",
-              },
-              {
-                label: "Có thể mở gian hàng",
-                description: "Bạn vẫn có thể chuyển sang bán hàng sau này.",
-              },
-            ]
-      }
     >
       <form className="space-y-5" onSubmit={handleSubmit(handleRegister)}>
         {errors.root?.message && (

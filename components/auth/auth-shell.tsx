@@ -4,20 +4,12 @@ import { ArrowLeft } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-type TrustItem = {
-  label: string
-  description: string
-}
-
 type AuthShellProps = {
   title: string
   description: string
   imageSrc: string
   imageAlt: string
   imageLabel: string
-  imageTitle?: string // kept for backward compat, unused in current layout
-  trustItems: TrustItem[]
-  variant?: "customer" | "seller"
   children: React.ReactNode
   className?: string
 }
@@ -28,7 +20,6 @@ export function AuthShell({
   imageSrc,
   imageAlt,
   imageLabel,
-  trustItems,
   children,
   className,
 }: AuthShellProps) {
@@ -102,19 +93,6 @@ export function AuthShell({
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {description}
               </p>
-            </div>
-
-            {/* Trust chips — mobile only */}
-            <div className="mb-6 flex flex-wrap gap-1.5 lg:hidden">
-              {trustItems.slice(0, 2).map((item) => (
-                <span
-                  key={item.label}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                >
-                  <span className="size-1.5 rounded-full bg-primary" />
-                  {item.label}
-                </span>
-              ))}
             </div>
 
             {children}

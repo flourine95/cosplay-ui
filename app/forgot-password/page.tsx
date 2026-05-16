@@ -57,25 +57,6 @@ export default function ForgotPasswordPage() {
       imageSrc="/auth-bg.jpg"
       imageAlt="Không gian hậu trường chuẩn bị trang phục cosplay"
       imageLabel="Khôi phục tài khoản"
-      imageTitle="Lấy lại quyền truy cập mà không mất lịch thuê hay đơn may."
-      trustItems={[
-        {
-          label: "Giữ lịch thuê",
-          description: "Lấy lại tài khoản để tiếp tục theo dõi ngày thuê.",
-        },
-        {
-          label: "Không mất đơn",
-          description: "Các đơn mua và đặt may vẫn nằm trong hồ sơ của bạn.",
-        },
-        {
-          label: "Link một lần",
-          description: "Liên kết đặt lại được giới hạn thời gian sử dụng.",
-        },
-        {
-          label: "Quay lại nhanh",
-          description: "Sau khi đổi mật khẩu, bạn có thể tiếp tục luồng cũ.",
-        },
-      ]}
     >
       {sent ? (
         <div className="space-y-5">

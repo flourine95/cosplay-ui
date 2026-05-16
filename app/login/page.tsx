@@ -35,7 +35,6 @@ export default function LoginPage() {
         title: "Đăng nhập để thanh toán",
         description:
           "Tiếp tục checkout, lưu địa chỉ giao hàng và theo dõi trạng thái thanh toán trong một nơi.",
-        imageTitle: "Hoàn tất đơn hàng mà không mất giỏ đồ.",
         imageLabel: "Thanh toán an tâm",
       }
     : redirect.startsWith("/rental")
@@ -43,7 +42,6 @@ export default function LoginPage() {
           title: "Đăng nhập để giữ lịch thuê",
           description:
             "Lưu ngày thuê, theo dõi cọc và nhận cập nhật khi seller xác nhận trang phục.",
-          imageTitle: "Giữ lịch thuê rõ ràng trước ngày sự kiện.",
           imageLabel: "Lịch thuê minh bạch",
         }
       : redirect.startsWith("/custom-order")
@@ -51,14 +49,12 @@ export default function LoginPage() {
             title: "Đăng nhập để đặt may",
             description:
               "Lưu số đo, trao đổi yêu cầu với seller và theo dõi tiến độ may theo từng bước.",
-            imageTitle: "Theo dõi số đo, báo giá và tiến độ may.",
             imageLabel: "Đặt may cá nhân",
           }
         : {
             title: "Đăng nhập",
             description:
               "Truy cập tài khoản để quản lý hoạt động mua bán, cho thuê và đặt may của bạn.",
-            imageTitle: "Đăng nhập để tiếp tục.",
             imageLabel: "Chào mừng trở lại",
           }
 
@@ -95,25 +91,6 @@ export default function LoginPage() {
       imageSrc="/auth-bg.jpg"
       imageAlt="Không gian chụp ảnh trang phục cosplay"
       imageLabel={authContext.imageLabel}
-      imageTitle={authContext.imageTitle}
-      trustItems={[
-        {
-          label: "Theo dõi cọc",
-          description: "Kiểm tra trạng thái thanh toán và hoàn cọc rõ ràng.",
-        },
-        {
-          label: "Giữ lịch thuê",
-          description: "Ngày nhận và trả đồ được lưu cùng đơn thuê.",
-        },
-        {
-          label: "Lưu số đo",
-          description: "Dùng lại hồ sơ số đo cho các đơn đặt may sau.",
-        },
-        {
-          label: "Cập nhật đơn",
-          description: "Theo dõi mua, thuê và đặt may trong cùng tài khoản.",
-        },
-      ]}
     >
       <form className="space-y-5" onSubmit={handleSubmit(handleLogin)}>
         {errors.root?.message && (

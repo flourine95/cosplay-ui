@@ -118,25 +118,6 @@ export default function ChangePasswordPage() {
       imageSrc="/auth-bg.jpg"
       imageAlt="Không gian bảo quản và chuẩn bị trang phục cosplay"
       imageLabel="Bảo mật tài khoản"
-      imageTitle="Bảo vệ những đơn hàng và số đo cá nhân của bạn."
-      trustItems={[
-        {
-          label: "Bảo vệ số đo",
-          description: "Hồ sơ cá nhân và số đo cần được giữ an toàn.",
-        },
-        {
-          label: "Giữ đơn hàng",
-          description: "Quyền truy cập đơn mua, thuê và đặt may vẫn liền mạch.",
-        },
-        {
-          label: "Link một lần",
-          description: "Luồng reset chỉ dùng token đã gửi qua email.",
-        },
-        {
-          label: "Cập nhật nhanh",
-          description: "Đổi mật khẩu xong là quay lại hồ sơ hoặc đăng nhập.",
-        },
-      ]}
     >
       <form className="space-y-5" onSubmit={handleSubmit(handlePasswordSubmit)}>
         {errors.root?.message && (
