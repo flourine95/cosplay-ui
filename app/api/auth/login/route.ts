@@ -2,17 +2,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { verifyPassword, createSession, sanitizeUser } from "@/lib/auth"
 import { UserStatus } from "@/app/generated/prisma/enums"
-import { z } from "zod"
-
-const schema = z.object({
-  email: z.email("Email không hợp lệ"),
-  password: z.string().min(1, "Vui lòng nhập mật khẩu"),
-})
+import { loginSchema } from "@/schemas/auth"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const parsed = schema.safeParse(body)
+    const parsed = loginSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(

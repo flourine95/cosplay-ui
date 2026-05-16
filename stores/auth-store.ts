@@ -2,26 +2,16 @@
 
 import { create } from "zustand"
 
-type AuthUser = {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: string
-  avatar: string | null
-}
+import type { LoginInput, RegisterInput } from "@/schemas/auth"
+import type { AuthUser } from "@/types/api"
 
 interface AuthStore {
   user: AuthUser | null
   isLoading: boolean
   setUser: (user: AuthUser | null) => void
   setLoading: (loading: boolean) => void
-  login: (email: string, password: string) => Promise<{ error?: string }>
-  register: (
-    name: string,
-    email: string,
-    password: string
-  ) => Promise<{ error?: string }>
+  login: (input: LoginInput) => Promise<{ error?: string }>
+  register: (input: RegisterInput) => Promise<{ error?: string }>
   logout: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -47,11 +37,11 @@ export const useAuth = create<AuthStore>()((set) => ({
     }
   },
 
-  login: async (email, password) => {
+  login: async (input) => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(input),
     })
     const data = await res.json()
     if (!res.ok) return { error: data.error }
@@ -59,11 +49,11 @@ export const useAuth = create<AuthStore>()((set) => ({
     return {}
   },
 
-  register: async (name, email, password) => {
+  register: async (input) => {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify(input),
     })
     const data = await res.json()
     if (!res.ok) return { error: data.error }

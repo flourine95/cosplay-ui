@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { randomBytes } from "crypto"
-import { z } from "zod"
-
-const schema = z.object({
-  email: z.email("Email không hợp lệ"),
-})
+import { forgotPasswordSchema } from "@/schemas/auth"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const parsed = schema.safeParse(body)
+    const parsed = forgotPasswordSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -40,7 +36,6 @@ export async function POST(request: NextRequest) {
     })
 
     // TODO: Gửi email với link: /change-password?token={token}
-    // Hiện tại log ra console để test
     console.warn(
       `[DEV] Reset link: ${process.env.NEXT_PUBLIC_APP_URL}/change-password?token=${token}`
     )
